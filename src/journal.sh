@@ -47,7 +47,7 @@ printing journal contents.
 __INTERNAL_JOURNALIST=beakerlib-journalling
 # TODO CHANGE
 export BEAKERLIB_METAFILE="/home/jheger/meta.file"
-__INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/od_journalling.py"
+__INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/od_journalling.py"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # rlJournalStart

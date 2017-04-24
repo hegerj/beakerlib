@@ -860,76 +860,90 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     for line in lines:
         (options, args) = optparser.parse_args(shlex.split(line))
 
-    command = args[0]
+        command = args[0]
 
-    if command == "init":
-        ret_need = need((options.test,))
-        if ret_need > 0:
-            return ret_need
-        package = Journal.determinePackage(options.test)
-        return Journal.initializeJournal(options.test, package)
-    elif command == "dump":
-        ret_need = need((options.type,))
-        if ret_need > 0:
-            return ret_need
-        Journal.dumpJournal(options.type)
-    elif command == "printlog":
-        ret_need = need((options.severity, options.full_journal))
-        if ret_need > 0:
-            return ret_need
-        Journal.createLog(options.severity, options.full_journal)
-    elif command == "addphase":
-        ret_need = need((options.name, options.type))
-        if ret_need > 0:
-            return ret_need
-        ret_need = Journal.addPhase(options.name, options.type)
-        if ret_need > 0:
-            return ret_need
-        Journal.printHeadLog(options.name)
-    elif command == "log":
-        ret_need = need((options.message,))
-        if ret_need > 0:
-            return ret_need
-        severity = options.severity
-        if severity is None:
-            severity = "LOG"
-        return Journal.addMessage(options.message, severity)
-    elif command == "test":
-        ret_need = need((options.message,))
-        if ret_need > 0:
-            return ret_need
-        result = options.result
-        if result is None:
-            result = "FAIL"
-        if Journal.addTest(options.message, result, options.command):
-            return 1
-        Journal.printLog(options.message, result)
-    elif command == "metric":
-        ret_need = need((options.name, options.type, options.value, options.tolerance))
-        if ret_need > 0:
-            return ret_need
-        try:
-            return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
-        except:
-            return 1
-    elif command == "finphase":
-        result, score, type_r, name = Journal.finPhase()
-        Journal._print("%s:%s:%s" % (type_r, result, name))
-        try:
-            return int(score)
-        except:
-            return 1
-    elif command == "teststate":
-        failed = Journal.testState()
-        return failed
-    elif command == "phasestate":
-        failed = Journal.phaseState()
-        return failed
-    elif command == "rpm":
-        ret_need = need((options.package,))
-        if ret_need > 0:
-            return ret_need
-        Journal.logRpmVersion(options.package)
+        if command == "init":
+            ret_need = need((options.test,))
+            if ret_need > 0:
+                return ret_need
+            package = Journal.determinePackage(options.test)
+            print "init" # TODO SMAZAT
+            #return Journal.initializeJournal(options.test, package)
+        elif command == "dump":
+            ret_need = need((options.type,))
+            if ret_need > 0:
+                return ret_need
+            print "dump" # TODO SMAZAT
+            #Journal.dumpJournal(options.type)
+        elif command == "printlog":
+            ret_need = need((options.severity, options.full_journal))
+            if ret_need > 0:
+                return ret_need
+            print "printlog" # TODO SMAZAT
+            #Journal.createLog(options.severity, options.full_journal)
+        elif command == "addphase":
+            ret_need = need((options.name, options.type))
+            if ret_need > 0:
+                return ret_need
+            #ret_need = Journal.addPhase(options.name, options.type)
+            if ret_need > 0:
+                return ret_need
+            #Journal.printHeadLog(options.name)
+            # TODO SMAZAT
+            print "addphase"
+        elif command == "log":
+            ret_need = need((options.message,))
+            if ret_need > 0:
+                return ret_need
+            severity = options.severity
+            if severity is None:
+                severity = "LOG"
+            # TODO SMAZAT
+            print "log"
+            #return Journal.addMessage(options.message, severity)
+        elif command == "test":
+            ret_need = need((options.message,))
+            if ret_need > 0:
+                return ret_need
+            result = options.result
+            if result is None:
+                result = "FAIL"
+            #if Journal.addTest(options.message, result, options.command):
+             #   return 1
+            #Journal.printLog(options.message, result)
+            # TODO SMAZAT
+            print "test"
+        elif command == "metric":
+            ret_need = need((options.name, options.type, options.value, options.tolerance))
+            #if ret_need > 0:
+            #    return ret_need
+            #try:
+            #    return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
+            #except:
+            #    return 1
+            print "metric" # TODO SMAZAT
+        elif command == "finphase":
+            #result, score, type_r, name = Journal.finPhase()
+            #Journal._print("%s:%s:%s" % (type_r, result, name))
+            #try:
+            #    return int(score)
+            #except:
+            #    return 1
+            print "finphase" # TODO SMAZAT
+        elif command == "teststate":
+            #failed = Journal.testState()
+            #return failed
+            print "teststate" # TODO SMAZAT
+        elif command == "phasestate":
+            #failed = Journal.phaseState()
+            #return failed
+            print "phasestate" # TODO SMAZAT
+        elif command == "rpm":
+            ret_need = need((options.package,))
+            #if ret_need > 0:
+            #    return ret_need
+            #Journal.logRpmVersion(options.package)
+            print "rpm" # TODO SMAZAT
     return 0
 
 
