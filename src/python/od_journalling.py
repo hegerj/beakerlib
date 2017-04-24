@@ -794,6 +794,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
   optparser.add_option("--type", default=None, dest="type")
   optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
 
+  """
   args_in = [_1, _2, _3, _4, _5, _6, _7, _8, _9, _10]
   if len(reduce(lambda x, y: x + y, args_in)) > 0:
     (options, args) = optparser.parse_args(args_in)
@@ -803,10 +804,26 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
   if len(args) != 1:
     print "Non-option arguments present, argc: %s" % len(args)
     return 1
+  """
 
   if not 'BEAKERLIB_JOURNAL' in os.environ:
     print "BEAKERLIB_JOURNAL not defined in the environment"
     return 1
+
+  if not 'BEAKERLIB_METAFILE' in os.environ:
+    print "BEAKERLIB_METAFILE not defined in the environment"
+    return 1
+
+  metafile = os.environ['BEAKERLIB_METAFILE']
+
+  with open(metafile) as fh:
+      lines = fh.readlines()
+
+  for line in lines:
+      (options, args) = optparser.parse_args(shlex.split(line))
+
+
+
 
   command = args[0]
 
