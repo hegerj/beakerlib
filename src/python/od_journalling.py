@@ -854,10 +854,25 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     metafile = os.environ['BEAKERLIB_METAFILE']
 
-    with open(metafile) as fh:
-        lines = fh.readlines()
+    fh = open(metafile, 'r+')
 
-    for line in lines:
+    # Reading metafile by lines
+    lines = fh.readlines()
+
+    line_count = 0
+    skipped_lines = 0
+
+    # Finding last 'lines read:' lines, getting the number
+    for line in lines[::-1]:
+        match = re.match(r'^lines\sread:\s(\d+)$', line)
+        if match:
+            skipped_lines = match.group(1)
+            break
+    skipped_lines = int(skipped_lines)
+
+    # Reading the file from point where it stopped last
+    for line in lines[skipped_lines:]:
+        line_count += 1
         (options, args) = optparser.parse_args(shlex.split(line))
 
         command = args[0]
@@ -944,6 +959,9 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #    return ret_need
             #Journal.logRpmVersion(options.package)
             print "rpm" # TODO SMAZAT
+
+    fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
+    fh.close()
     return 0
 
 
