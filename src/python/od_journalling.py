@@ -678,6 +678,7 @@ class Journal(object):
 
     finPhase = staticmethod(finPhase)
 
+    """
     # TODO not used? Error in  'name' var
     # @staticmethod
     def getPhase(tree):
@@ -687,6 +688,7 @@ class Journal(object):
         return tree
 
     getPhase = staticmethod(getPhase)
+    """
 
     # @staticmethod
     def testState():
