@@ -832,17 +832,31 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     optparser.add_option("--type", default=None, dest="type")
     optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
 
-    """
+
     args_in = [_1, _2, _3, _4, _5, _6, _7, _8, _9, _10]
     if len(reduce(lambda x, y: x + y, args_in)) > 0:
       (options, args) = optparser.parse_args(args_in)
     else:
       (options, args) = optparser.parse_args()
-  
+    """
     if len(args) != 1:
       print "Non-option arguments present, argc: %s" % len(args)
       return 1
     """
+    # If called with argument (init)
+    if args:
+        command = args[0]
+    else:
+        command = None
+
+    if command == "init":
+        ret_need = need((options.test,))
+        # TODO what replace instead of return? something that tells that it was unsuccessful
+        if ret_need > 0:
+            return ret_need
+        package = Journal.determinePackage(options.test)
+        print "init from args"  # TODO SMAZAT
+        return Journal.initializeJournal(options.test, package)
 
     if not 'BEAKERLIB_JOURNAL' in os.environ:
         print "BEAKERLIB_JOURNAL not defined in the environment"
@@ -879,27 +893,28 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
         if command == "init":
             ret_need = need((options.test,))
-            if ret_need > 0:
-                return ret_need
+            # TODO what replace instead of return? something that tells that it was unsuccessful
+            #if ret_need > 0:
+                #return ret_need
             package = Journal.determinePackage(options.test)
             print "init" # TODO SMAZAT
             #return Journal.initializeJournal(options.test, package)
         elif command == "dump":
             ret_need = need((options.type,))
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             print "dump" # TODO SMAZAT
             #Journal.dumpJournal(options.type)
         elif command == "printlog":
             ret_need = need((options.severity, options.full_journal))
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             print "printlog" # TODO SMAZAT
             #Journal.createLog(options.severity, options.full_journal)
         elif command == "addphase":
             ret_need = need((options.name, options.type))
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             #ret_need = Journal.addPhase(options.name, options.type)
             if ret_need > 0:
                 return ret_need
@@ -908,8 +923,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             print "addphase"
         elif command == "log":
             ret_need = need((options.message,))
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             severity = options.severity
             if severity is None:
                 severity = "LOG"
@@ -918,8 +933,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #return Journal.addMessage(options.message, severity)
         elif command == "test":
             ret_need = need((options.message,))
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             result = options.result
             if result is None:
                 result = "FAIL"

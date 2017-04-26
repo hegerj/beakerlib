@@ -95,7 +95,15 @@ rlJournalStart(){
     fi
 
     # finally intialize the journal
-    rljPrintToMeta init --test \""$TEST"\" >&2
+    # TODO ADDED
+    #rljPrintToMeta init --test \""$TEST"\" >&2
+    if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
+        rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
+    else
+        echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
+        exit 1
+    fi
+
     if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
