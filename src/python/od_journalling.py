@@ -243,8 +243,11 @@ class Journal(object):
     __get_hw_hdd = staticmethod(__get_hw_hdd)
 
     # @staticmethod
-    def createLog(severity, full_journal=False):
-        jrnl = Journal.openJournal()
+    def createLog(severity, full_journal=False, jrnl=None):
+        # Backward compability
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         Journal.printHeadLog("TEST PROTOCOL")
         phasesFailed = 0
         phasesProcessed = 0
@@ -615,8 +618,11 @@ class Journal(object):
     getLastUnfinishedPhase = staticmethod(getLastUnfinishedPhase)
 
     # @staticmethod
-    def addPhase(name, phase_type):
-        jrnl = Journal.openJournal()
+    def addPhase(name, phase_type, jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         log = Journal.getLogEl(jrnl)
 
         name = unicode(name, 'utf-8', errors='replace')
@@ -656,8 +662,11 @@ class Journal(object):
     getPhaseState = staticmethod(getPhaseState)
 
     # @staticmethod
-    def finPhase():
-        jrnl = Journal.openJournal()
+    def finPhase(jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         type = phase.get('type')
         name = phase.get('name')
@@ -691,8 +700,11 @@ class Journal(object):
     """
 
     # @staticmethod
-    def testState():
-        jrnl = Journal.openJournal()
+    def testState(jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         failed = 0
 
         for phase in jrnl.xpath('//phase'):
@@ -704,8 +716,11 @@ class Journal(object):
     testState = staticmethod(testState)
 
     # @staticmethod
-    def phaseState():
-        jrnl = Journal.openJournal()
+    def phaseState(jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         failed = Journal.getPhaseState(phase)[1]
         if failed > 255:
@@ -715,8 +730,11 @@ class Journal(object):
     phaseState = staticmethod(phaseState)
 
     # @staticmethod
-    def addMessage(message, severity):
-        jrnl = Journal.openJournal()
+    def addMessage(message, severity, jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -734,8 +752,11 @@ class Journal(object):
     addMessage = staticmethod(addMessage)
 
     # @staticmethod
-    def addTest(message, result="FAIL", command=None):
-        jrnl = Journal.openJournal()
+    def addTest(message, result="FAIL", command=None, jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -758,8 +779,11 @@ class Journal(object):
     addTest = staticmethod(addTest)
 
     # @staticmethod
-    def logRpmVersion(package):
-        jrnl = Journal.openJournal()
+    def logRpmVersion(package, jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
         ts = rpm.ts()
@@ -773,8 +797,11 @@ class Journal(object):
     logRpmVersion = staticmethod(logRpmVersion)
 
     # @staticmethod
-    def addMetric(type, name, value, tolerance):
-        jrnl = Journal.openJournal()
+    def addMetric(type, name, value, tolerance, jrnl=None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -916,8 +943,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #if ret_need > 0:
             #    return ret_need
             #ret_need = Journal.addPhase(options.name, options.type)
-            if ret_need > 0:
-                return ret_need
+            #if ret_need > 0:
+            #    return ret_need
             #Journal.printHeadLog(options.name)
             # TODO SMAZAT
             print "addphase"
