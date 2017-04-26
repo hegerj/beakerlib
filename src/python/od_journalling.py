@@ -795,11 +795,15 @@ class Journal(object):
     addMetric = staticmethod(addMetric)
 
     # @staticmethod
-    def dumpJournal(type):
+    def dumpJournal(type, jrnl = None):
+        # Backward compatibility
+        if jrnl == None:
+            jrnl = Journal.openJournal()
+
         if type == "raw":
-            print etree.tostring(Journal.openJournal(), encoding="utf-8", xml_declaration=True)
+            print etree.tostring(jrnl, encoding="utf-8", xml_declaration=True)
         elif type == "pretty":
-            print etree.tostring(Journal.openJournal(), pretty_print=True, encoding="utf-8", xml_declaration=True)
+            print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
         else:
             print "Journal dump error: bad type specification"
 
@@ -895,16 +899,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         (options, args) = optparser.parse_args(shlex.split(line))
 
         command = args[0]
-
-        if command == "init":
-            ret_need = need((options.test,))
-            # TODO what replace instead of return? something that tells that it was unsuccessful
-            #if ret_need > 0:
-                #return ret_need
-            package = Journal.determinePackage(options.test)
-            print "init" # TODO SMAZAT
-            #return Journal.initializeJournal(options.test, package)
-        elif command == "dump":
+        if command == "dump":
             ret_need = need((options.type,))
             #if ret_need > 0:
             #    return ret_need
