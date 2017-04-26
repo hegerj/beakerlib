@@ -843,12 +843,19 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
       print "Non-option arguments present, argc: %s" % len(args)
       return 1
     """
+
+    if not 'BEAKERLIB_JOURNAL' in os.environ:
+        print "BEAKERLIB_JOURNAL not defined in the environment"
+        return 1
+
     # If called with argument (init)
     if args:
         command = args[0]
     else:
         command = None
-
+    # When init is called the behaviour differs from other commands
+    # init is processed standardly and after initialization immediately returns
+    # to journal.sh with return code
     if command == "init":
         ret_need = need((options.test,))
         # TODO what replace instead of return? something that tells that it was unsuccessful
@@ -858,16 +865,12 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "init from args"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
 
-    if not 'BEAKERLIB_JOURNAL' in os.environ:
-        print "BEAKERLIB_JOURNAL not defined in the environment"
-        return 1
-
     if not 'BEAKERLIB_METAFILE' in os.environ:
         print "BEAKERLIB_METAFILE not defined in the environment"
         return 1
-
     metafile = os.environ['BEAKERLIB_METAFILE']
 
+    # Opening metafile for reading and writing
     fh = open(metafile, 'r+')
 
     # Reading metafile by lines
@@ -876,7 +879,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     line_count = 0
     skipped_lines = 0
 
-    # Finding last 'lines read:' lines, getting the number
+    # Finding last 'lines read:' line, getting the number
     for line in lines[::-1]:
         match = re.match(r'^lines\sread:\s(\d+)$', line)
         if match:
