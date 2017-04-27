@@ -848,6 +848,23 @@ def need(args):
         return 1
 
 
+# TODO COMMENT
+# Failed to add a test: there is no phase open
+# So we open it, add a test, add a FAIL to let the user know
+# he has a broken test, and close the phase again
+def test_out_of_phase(message=None, result=None, jrnl=None):
+    if jrnl == None:
+        jrnl = Journal.openJournal()
+
+    Journal.addPhase("FAIL", "Asserts collected outside of a phase", jrnl=jrnl)
+    Journal.printHeadLog("Asserts collected outside of a phase")
+    Journal.addTest(message="TEST BUG: Assertion not in phase", result="FAIL", jrnl=jrnl)
+    Journal.addTest(message=message, result=result, jrnl=jrnl)
+    Journal.printLog(message, result)
+    Journal.finPhase(jrnl=jrnl)
+    return 0
+
+
 def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     DESCRIPTION = "Wrapper for operations above BeakerLib journal"
     optparser = OptionParser(description=DESCRIPTION)
@@ -981,18 +998,20 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             # TODO SMAZAT
             print "log"
             #return Journal.addMessage(options.message, severity)
+        # TODO Possible regressions, needs logic check
         elif command == "test":
             ret_need = need((options.message,))
-            #if ret_need > 0:
-            #    return ret_need
+            if ret_need > 0:
+                test_out_of_phase(options.message, "FAIL", jrnl=jrnl)
+                continue
             result = options.result
             if result is None:
                 result = "FAIL"
-            #if Journal.addTest(options.message, result, options.command):
-             #   return 1
-            #Journal.printLog(options.message, result)
-            # TODO SMAZAT
-            print "test"
+            if Journal.addTest(options.message, result, options.command):
+                test_out_of_phase(options.message, result, jrnl=jrnl)
+                continue
+            Journal.printLog(options.message, result)
+            print "test"  # TODO SMAZAT
         elif command == "metric":
             ret_need = need((options.name, options.type, options.value, options.tolerance))
             #if ret_need > 0:
