@@ -990,7 +990,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             print "metric" # TODO SMAZAT
         elif command == "finphase":
             print "finphase" # TODO SMAZAT
-            result, score, type_r, name = Journal.finPhase()
+            result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
             Journal._print("%s:%s:%s" % (type_r, result, name))
             try:
                 return int(score)
@@ -1006,6 +1006,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
     fh.close()
 
+    # TODO is this needed? finphase seems to save it on its own
     Journal.saveJournal(jrnl)
     return 0
 
