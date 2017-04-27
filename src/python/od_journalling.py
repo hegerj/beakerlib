@@ -881,13 +881,13 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_JOURNAL not defined in the environment"
         return 1
 
-
-    # If called with argument (init)
+    # If called with argument
     if args:
         command = args[0]
     else:
         command = None
-    # init/finphase/teststate/phasestate has different behaviour than other commands
+
+    # init/finphase/teststate/phasestate/printlog have different behaviour than other commands
     # these commands are processed immediately and their results a returned
     # to journal.sh
     if command == "init":
@@ -895,7 +895,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         if ret_need > 0:
             return ret_need
         package = Journal.determinePackage(options.test)
-        print "init from args"  # TODO SMAZAT
+        print "init from ARGS"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
     elif command == "finphase":
         #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
@@ -904,7 +904,17 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         #   return int(score)
         #except:
         #   return 1
-        print "finphase from args"
+        # TODO SMAZAT
+        with open("/home/jheger/control_finphase", 'a') as fh:
+            fh.write("command: {0}\n".format(command))
+        return 0
+    elif command == "printlog":
+        ret_need = need((options.severity, options.full_journal))
+        # if ret_need > 0:
+        #    return ret_need
+        # Journal.createLog(options.severity, options.full_journal)
+        print "printlog from ARGS"  # TODO SMAZAT
+        return 0  # TODO SMAZAT ?? possibly not
     elif command == "teststate":
         failed = Journal.testState()
         return failed
@@ -951,12 +961,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #    return ret_need
             print "dump" # TODO SMAZAT
             #Journal.dumpJournal(options.type)
-        elif command == "printlog":
-            ret_need = need((options.severity, options.full_journal))
-            #if ret_need > 0:
-            #    return ret_need
-            print "printlog" # TODO SMAZAT
-            #Journal.createLog(options.severity, options.full_journal)
         elif command == "addphase":
             ret_need = need((options.name, options.type))
             #if ret_need > 0:

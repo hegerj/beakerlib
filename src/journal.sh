@@ -179,6 +179,7 @@ rlJournalEnd(){
     local journal="$BEAKERLIB_JOURNAL"
     local journaltext="$BEAKERLIB_DIR/journal.txt"
     rlJournalPrintText > $journaltext
+
     # TODO Last interaction with journalling.py
     $__INTERNAL_ONDEMAND_JOURNALIST
 
@@ -332,7 +333,8 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    rljPrintToMeta printlog --severity \""$SEVERITY"\" \""$FULL_JOURNAL"\"
+    # ADDED
+    $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity \""$SEVERITY"\" \""$FULL_JOURNAL"\"
     $__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
 }
 
@@ -406,6 +408,7 @@ rljClosePhase(){
     local name=$(echo "$out" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
     rlJournalPrintText > $logfile
+    $__INTERNAL_ONDEMAND_JOURNALIST
     rlReport "$name" "$result" "$score" "$logfile"
 }
 
