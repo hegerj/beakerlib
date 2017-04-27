@@ -354,8 +354,8 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
+    #rljPrintToMeta teststate >&2
     $__INTERNAL_JOURNALIST teststate >&2
-    rljPrintToMeta teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -375,8 +375,8 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
+    #rljPrintToMeta phasestate >&2
     $__INTERNAL_JOURNALIST phasestate >&2
-    rljPrintToMeta phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -395,8 +395,9 @@ rljAddPhase(){
 
 rljClosePhase(){
     local out
+    # ADDED
+    out=$(rljPrintToMeta finphase)
     out=$($__INTERNAL_JOURNALIST finphase)
-    rljPrintToMeta finphase
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
     local result="$(echo "$out" | cut -d ':' -f 2)"

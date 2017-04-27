@@ -886,17 +886,22 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         command = args[0]
     else:
         command = None
-    # When init is called the behaviour differs from other commands
-    # init is processed standardly and after initialization immediately returns
-    # to journal.sh with return code
+    # init/teststate/phasestate has different behaviour than other commands
+    # these commands are processed immediately and their results a returned
+    # to journal.sh
     if command == "init":
         ret_need = need((options.test,))
-        # TODO what replace instead of return? something that tells that it was unsuccessful
         if ret_need > 0:
             return ret_need
         package = Journal.determinePackage(options.test)
         print "init from args"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
+    elif command == "teststate":
+        failed = Journal.testState()
+        return failed
+    elif command == "phasestate":
+        failed = Journal.phaseState()
+        return failed
 
     if not 'BEAKERLIB_METAFILE' in os.environ:
         print "BEAKERLIB_METAFILE not defined in the environment"
@@ -920,11 +925,15 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             break
     skipped_lines = int(skipped_lines)
 
+    # Opening (=parsing) journal
+    jrnl = Journal.openJournal()
+
     # Reading the file from point where it stopped last
     for line in lines[skipped_lines:]:
         line_count += 1
         (options, args) = optparser.parse_args(shlex.split(line))
 
+        # TODO How to replace ret_need?
         command = args[0]
         if command == "dump":
             ret_need = need((options.type,))
@@ -980,21 +989,13 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #    return 1
             print "metric" # TODO SMAZAT
         elif command == "finphase":
-            #result, score, type_r, name = Journal.finPhase()
-            #Journal._print("%s:%s:%s" % (type_r, result, name))
-            #try:
-            #    return int(score)
-            #except:
-            #    return 1
             print "finphase" # TODO SMAZAT
-        elif command == "teststate":
-            #failed = Journal.testState()
-            #return failed
-            print "teststate" # TODO SMAZAT
-        elif command == "phasestate":
-            #failed = Journal.phaseState()
-            #return failed
-            print "phasestate" # TODO SMAZAT
+            result, score, type_r, name = Journal.finPhase()
+            Journal._print("%s:%s:%s" % (type_r, result, name))
+            try:
+                return int(score)
+            except:
+                return 1
         elif command == "rpm":
             ret_need = need((options.package,))
             #if ret_need > 0:
@@ -1004,6 +1005,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
     fh.close()
+
+    Journal.saveJournal(jrnl)
     return 0
 
 
