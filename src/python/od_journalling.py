@@ -881,12 +881,13 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_JOURNAL not defined in the environment"
         return 1
 
+
     # If called with argument (init)
     if args:
         command = args[0]
     else:
         command = None
-    # init/teststate/phasestate has different behaviour than other commands
+    # init/finphase/teststate/phasestate has different behaviour than other commands
     # these commands are processed immediately and their results a returned
     # to journal.sh
     if command == "init":
@@ -896,12 +897,21 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         package = Journal.determinePackage(options.test)
         print "init from args"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
+    elif command == "finphase":
+        #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
+        #Journal._print("%s:%s:%s" % (type_r, result, name))
+        #try:
+        #   return int(score)
+        #except:
+        #   return 1
+        print "finphase from args"
     elif command == "teststate":
         failed = Journal.testState()
         return failed
     elif command == "phasestate":
         failed = Journal.phaseState()
         return failed
+
 
     if not 'BEAKERLIB_METAFILE' in os.environ:
         print "BEAKERLIB_METAFILE not defined in the environment"
@@ -988,14 +998,15 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             #except:
             #    return 1
             print "metric" # TODO SMAZAT
+        # TODO init-like
         elif command == "finphase":
             print "finphase" # TODO SMAZAT
-            result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
-            Journal._print("%s:%s:%s" % (type_r, result, name))
-            try:
-                return int(score)
-            except:
-                return 1
+            #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
+            #Journal._print("%s:%s:%s" % (type_r, result, name))
+            #try:
+            #    return int(score)
+            #except:
+            #    return 1
         elif command == "rpm":
             ret_need = need((options.package,))
             #if ret_need > 0:
@@ -1006,7 +1017,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
     fh.close()
 
-    # TODO is this needed? finphase seems to save it on its own
+
+    # This save will be used when calling from journal.sh rlJournalEnd()
     Journal.saveJournal(jrnl)
     return 0
 
