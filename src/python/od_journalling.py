@@ -747,7 +747,7 @@ class Journal(object):
         msg.text = msgText
 
         add_to.append(msg)
-        return Journal.saveJournal(jrnl)
+        return Journal.saveJournal(jrnl)   # TODO SMAZAT extra saveJournal?
 
     addMessage = staticmethod(addMessage)
 
@@ -774,7 +774,7 @@ class Journal(object):
         msg.text = result
         add_to.append(msg)
 
-        return Journal.saveJournal(jrnl)
+        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
 
     addTest = staticmethod(addTest)
 
@@ -792,7 +792,7 @@ class Journal(object):
             pkgEl, pkgCon = pkg
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
-        return Journal.saveJournal(jrnl)
+        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
 
     logRpmVersion = staticmethod(logRpmVersion)
 
@@ -817,7 +817,7 @@ class Journal(object):
         metric.text = str(value)
         add_to.append(metric)
 
-        return Journal.saveJournal(jrnl)
+        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
 
     addMetric = staticmethod(addMetric)
 
@@ -852,7 +852,7 @@ def need(args):
 # Failed to add a test: there is no phase open
 # So we open it, add a test, add a FAIL to let the user know
 # he has a broken test, and close the phase again
-def test_out_of_phase(message=None, result=None, jrnl=None):
+def testOutOfPhase(message=None, result=None, jrnl=None):
     if jrnl == None:
         jrnl = Journal.openJournal()
 
@@ -862,6 +862,119 @@ def test_out_of_phase(message=None, result=None, jrnl=None):
     Journal.addTest(message=message, result=result, jrnl=jrnl)
     Journal.printLog(message, result)
     Journal.finPhase(jrnl=jrnl)
+    return 0
+
+
+# TODO DESCRIPTION
+def updateXML(optparser, jrnl=None):
+    if jrnl == None:
+        jrnl = Journal.openJournal()
+
+    metafile = os.environ['BEAKERLIB_METAFILE']
+
+    # Opening metafile for reading and writing
+    try:
+        fh = open(metafile, 'r+')
+    except IOError:
+        Journal.printLog('Failed to open metafile', 'BEAKERLIB_WARNING')
+        return 1
+
+    # Reading metafile by lines
+    lines = fh.readlines()
+
+    line_count = 0
+    skipped_lines = 0
+
+    # Finding last 'lines read:' line, getting the number
+    for line in lines[::-1]:
+        match = re.match(r'^lines\sread:\s(\d+)$', line)
+        if match:
+            skipped_lines = match.group(1)
+            break
+    skipped_lines = int(skipped_lines)
+
+    # If no new commands were added to file
+    # there is no need to read it
+    if len(lines) == skipped_lines:
+        fh.close()
+        return 0
+
+    # Reading the file from point where it stopped last
+    for line in lines[skipped_lines:]:
+        line_count += 1
+        (options, args) = optparser.parse_args(shlex.split(line))
+
+        # TODO How to replace ret_need?
+        command = args[0]
+        if command == "dump":
+            ret_need = need((options.type,))
+            # if ret_need > 0:
+            #    return ret_need
+            print "dump"  # TODO SMAZAT
+            # Journal.dumpJournal(options.type)
+            continue
+        elif command == "addphase":
+            ret_need = need((options.name, options.type))
+            # if ret_need > 0:
+            #    return ret_need
+            # ret_need = Journal.addPhase(options.name, options.type)
+            # if ret_need > 0:
+            #    return ret_need
+            # Journal.printHeadLog(options.name)
+            # TODO SMAZAT
+            print "addphase"
+            continue
+        elif command == "log":
+            ret_need = need((options.message,))
+            # if ret_need > 0:
+            #    return ret_need
+            severity = options.severity
+            if severity is None:
+                severity = "LOG"
+            # TODO SMAZAT
+            print "log"
+            # return Journal.addMessage(options.message, severity)
+            continue
+        # TODO Possible regressions, needs logic check
+        elif command == "test":
+            """ # TODO SMAZAT
+            ret_need = need((options.message,))
+            if ret_need > 0:
+                testOutOfPhase(options.message, "FAIL", jrnl=jrnl)
+                continue
+            result = options.result
+            if result is None:
+                result = "FAIL"
+            if Journal.addTest(options.message, result, options.command):
+                testOutOfPhase(options.message, result, jrnl=jrnl)
+                continue
+            Journal.printLog(options.message, result)
+            """
+            print "test"  # TODO SMAZAT
+            continue
+        elif command == "metric":
+            ret_need = need((options.name, options.type, options.value, options.tolerance))
+            # if ret_need > 0:
+            #    return ret_need
+            # try:
+            #    return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
+            # except:
+            #    return 1
+            print "metric"  # TODO SMAZAT
+            continue
+        elif command == "rpm":
+            ret_need = need((options.package,))
+            # if ret_need > 0:
+            #    return ret_need
+            # Journal.logRpmVersion(options.package)
+            print "rpm"  # TODO SMAZAT
+            continue
+
+    fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
+    fh.close()
+
+    # TODO outdated comment asi # This save will be used when calling from journal.sh rlJournalEnd()
+    Journal.saveJournal(jrnl)
     return 0
 
 
@@ -898,6 +1011,10 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_JOURNAL not defined in the environment"
         return 1
 
+    if not 'BEAKERLIB_METAFILE' in os.environ:
+        print "BEAKERLIB_METAFILE not defined in the environment"
+        return 1
+
     # If called with argument
     if args:
         command = args[0]
@@ -914,16 +1031,17 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         package = Journal.determinePackage(options.test)
         print "init from ARGS"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
-    elif command == "finphase":
+    else:
+        jrnl = Journal.openJournal()
+
+    if command == "finphase":
         #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
         #Journal._print("%s:%s:%s" % (type_r, result, name))
         #try:
         #   return int(score)
         #except:
         #   return 1
-        # TODO SMAZAT
-        with open("/home/jheger/control_finphase", 'a') as fh:
-            fh.write("command: {0}\n".format(command))
+        print "finphase from ARGS"
         return 0
     elif command == "printlog":
         ret_need = need((options.severity, options.full_journal))
@@ -940,109 +1058,10 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         return failed
 
 
-    if not 'BEAKERLIB_METAFILE' in os.environ:
-        print "BEAKERLIB_METAFILE not defined in the environment"
-        return 1
-    metafile = os.environ['BEAKERLIB_METAFILE']
+    # TODO think about it, why calling with optparser or better yet dont you double parse? probably not
+    # If called without argument update XML journal
+    updateXML(optparser, jrnl)
 
-    # Opening metafile for reading and writing
-    fh = open(metafile, 'r+')
-
-    # Reading metafile by lines
-    lines = fh.readlines()
-
-    line_count = 0
-    skipped_lines = 0
-
-    # Finding last 'lines read:' line, getting the number
-    for line in lines[::-1]:
-        match = re.match(r'^lines\sread:\s(\d+)$', line)
-        if match:
-            skipped_lines = match.group(1)
-            break
-    skipped_lines = int(skipped_lines)
-
-    # Opening (=parsing) journal
-    jrnl = Journal.openJournal()
-
-    # Reading the file from point where it stopped last
-    for line in lines[skipped_lines:]:
-        line_count += 1
-        (options, args) = optparser.parse_args(shlex.split(line))
-
-        # TODO How to replace ret_need?
-        command = args[0]
-        if command == "dump":
-            ret_need = need((options.type,))
-            #if ret_need > 0:
-            #    return ret_need
-            print "dump" # TODO SMAZAT
-            #Journal.dumpJournal(options.type)
-        elif command == "addphase":
-            ret_need = need((options.name, options.type))
-            #if ret_need > 0:
-            #    return ret_need
-            #ret_need = Journal.addPhase(options.name, options.type)
-            #if ret_need > 0:
-            #    return ret_need
-            #Journal.printHeadLog(options.name)
-            # TODO SMAZAT
-            print "addphase"
-        elif command == "log":
-            ret_need = need((options.message,))
-            #if ret_need > 0:
-            #    return ret_need
-            severity = options.severity
-            if severity is None:
-                severity = "LOG"
-            # TODO SMAZAT
-            print "log"
-            #return Journal.addMessage(options.message, severity)
-        # TODO Possible regressions, needs logic check
-        elif command == "test":
-            ret_need = need((options.message,))
-            if ret_need > 0:
-                test_out_of_phase(options.message, "FAIL", jrnl=jrnl)
-                continue
-            result = options.result
-            if result is None:
-                result = "FAIL"
-            if Journal.addTest(options.message, result, options.command):
-                test_out_of_phase(options.message, result, jrnl=jrnl)
-                continue
-            Journal.printLog(options.message, result)
-            print "test"  # TODO SMAZAT
-        elif command == "metric":
-            ret_need = need((options.name, options.type, options.value, options.tolerance))
-            #if ret_need > 0:
-            #    return ret_need
-            #try:
-            #    return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
-            #except:
-            #    return 1
-            print "metric" # TODO SMAZAT
-        # TODO init-like
-        elif command == "finphase":
-            print "finphase" # TODO SMAZAT
-            #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
-            #Journal._print("%s:%s:%s" % (type_r, result, name))
-            #try:
-            #    return int(score)
-            #except:
-            #    return 1
-        elif command == "rpm":
-            ret_need = need((options.package,))
-            #if ret_need > 0:
-            #    return ret_need
-            #Journal.logRpmVersion(options.package)
-            print "rpm" # TODO SMAZAT
-
-    fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
-    fh.close()
-
-
-    # This save will be used when calling from journal.sh rlJournalEnd()
-    Journal.saveJournal(jrnl)
     return 0
 
 

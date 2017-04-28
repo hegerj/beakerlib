@@ -401,6 +401,7 @@ rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
+    echo "journal.sh out: $out"  # TODO SMAZAT
     out=$($__INTERNAL_JOURNALIST finphase)
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
