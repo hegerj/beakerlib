@@ -45,8 +45,8 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
-# TODO CHANGE
-export BEAKERLIB_METAFILE="/home/jheger/meta.file"
+# TODO SMAZAT
+#export BEAKERLIB_METAFILE="/home/jheger/meta.file"
 __INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/od_journalling.py"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,8 +84,10 @@ rlJournalStart(){
 
     [ -d "$BEAKERLIB_DIR" ] || mkdir -p "$BEAKERLIB_DIR"
 
-    # set global BeakerLib journal variable for future use
+    # set global BeakerLib journal and metafile variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
+    export BEAKERLIB_METAFILE="$BEAKERLIB_DIR/journal.meta"
+
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
@@ -409,7 +411,7 @@ rljClosePhase(){
     local name=$(echo "$out" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
     rlJournalPrintText > $logfile
-    $__INTERNAL_ONDEMAND_JOURNALIST
+    #$__INTERNAL_ONDEMAND_JOURNALIST  # TODO probably outdated by finphase calling updateXML
     rlReport "$name" "$result" "$score" "$logfile"
 }
 

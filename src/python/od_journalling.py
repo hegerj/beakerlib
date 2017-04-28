@@ -1041,6 +1041,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         #   return int(score)
         #except:
         #   return 1
+        # updateXML(optparser, jrnl)
         print "finphase from ARGS"
         return 0
     elif command == "printlog":
@@ -1048,13 +1049,16 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         # if ret_need > 0:
         #    return ret_need
         # Journal.createLog(options.severity, options.full_journal)
+        # updateXML(optparser, jrnl)
         print "printlog from ARGS"  # TODO SMAZAT
         return 0  # TODO SMAZAT ?? possibly not
     elif command == "teststate":
         failed = Journal.testState()
+        # updateXML(optparser, jrnl)
         return failed
     elif command == "phasestate":
         failed = Journal.phaseState()
+        # updateXML(optparser, jrnl)
         return failed
 
 
