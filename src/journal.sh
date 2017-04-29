@@ -255,8 +255,8 @@ Example:
 
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    rljPrintToMeta dump --type \""$TYPE"\"
-    $__INTERNAL_JOURNALIST dump --type "$TYPE"
+    rljPrintToMeta dump --type "$TYPE"
+    #$__INTERNAL_JOURNALIST dump --type "$TYPE"
 }
 
 # backward compatibility
@@ -334,8 +334,8 @@ rlJournalPrintText(){
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
     # ADDED
-    $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity \""$SEVERITY"\" \""$FULL_JOURNAL"\"
-    $__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
+    $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
+    #$__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
 }
 
 # backward compatibility
@@ -359,7 +359,7 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 
 rlGetTestState(){
     $__INTERNAL_ONDEMAND_JOURNALIST teststate
-    $__INTERNAL_JOURNALIST teststate >&2
+    #$__INTERNAL_JOURNALIST teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -380,7 +380,7 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 
 rlGetPhaseState(){
     $__INTERNAL_ONDEMAND_JOURNALIST phasestate
-    $__INTERNAL_JOURNALIST phasestate >&2
+    #$__INTERNAL_JOURNALIST phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -393,16 +393,18 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    rljPrintToMeta addphase --name \""$MSG"\" --type \""$1"\" >&2
-    $__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
+    rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
+    #$__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
 rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
+    # ADDED
+    out=${out##*$'\n'}
     echo "journal.sh out: \"$out\"";   # TODO SMAZAT
-    out=$($__INTERNAL_JOURNALIST finphase)
+    #out=$($__INTERNAL_JOURNALIST finphase)
     # TODO cut everything from out besides last line
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
@@ -415,7 +417,7 @@ rljClosePhase(){
 }
 
 rljAddTest(){
-    rljPrintToMeta test --message \""$1"\" --result \""$2"\" ${3:+--command \""$3"\"} >&2
+    rljPrintToMeta test --message "$1" --result "$2" ${3:+--command "$3"} >&2
     #if ! eval "$__INTERNAL_JOURNALIST test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
     #then
       # Failed to add a test: there is no phase open
@@ -425,8 +427,8 @@ rljAddTest(){
       #rljAddPhase "FAIL" "Asserts collected outside of a phase"
       #$__INTERNAL_JOURNALIST test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
       #$__INTERNAL_JOURNALIST test --message "$1" --result "$2" >&2
-      #rljPrintToMeta test --message \""TEST BUG: Assertion not in phase"\" --result \""FAIL"\" >&2
-      #rljPrintToMeta test --message \""$1"\" --result \""$2"\" >&2
+      #rljPrintToMeta test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
+      #rljPrintToMeta test --message "$1" --result "$2" >&2
       #rljClosePhase
     #fi
 }
@@ -441,21 +443,21 @@ rljAddMetric(){
         return 1
     fi
     rlLogDebug "rljAddMetric: Storing metric $MID with value $VALUE and tolerance $TOLERANCE"
-    rljPrintToMeta metric --type \""$1"\" --name \""$MID"\" \
-        --value \""$VALUE"\" --tolerance \""$TOLERANCE"\" >&2
-    $__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
+    rljPrintToMeta metric --type "$1" --name "$MID" \
         --value "$VALUE" --tolerance "$TOLERANCE" >&2
+    #$__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
+        #--value "$VALUE" --tolerance "$TOLERANCE" >&2
     return $?
 }
 
 rljAddMessage(){
-    rljPrintToMeta log --message \""$1"\" --severity \""$2"\" >&2
-    $__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
+    rljPrintToMeta log --message "$1" --severity "$2" >&2
+    #$__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
 }
 
 rljRpmLog(){
-    rljPrintToMeta rpm --package \""$1"\" >&2
-    $__INTERNAL_JOURNALIST rpm --package "$1" >&2
+    rljPrintToMeta rpm --package "$1" >&2
+    #$__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
 # TODO Description
