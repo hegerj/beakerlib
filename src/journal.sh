@@ -45,8 +45,7 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
-# TODO SMAZAT
-#export BEAKERLIB_METAFILE="/home/jheger/meta.file"
+# TODO CHANGE in Makefile
 __INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/od_journalling.py"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,8 +255,8 @@ Example:
 
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    $__INTERNAL_JOURNALIST dump --type "$TYPE"
     rljPrintToMeta dump --type \""$TYPE"\"
+    $__INTERNAL_JOURNALIST dump --type "$TYPE"
 }
 
 # backward compatibility
@@ -359,6 +358,7 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
+    $__INTERNAL_ONDEMAND_JOURNALIST teststate
     $__INTERNAL_JOURNALIST teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
@@ -379,6 +379,7 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
+    $__INTERNAL_ONDEMAND_JOURNALIST phasestate
     $__INTERNAL_JOURNALIST phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
@@ -440,21 +441,21 @@ rljAddMetric(){
         return 1
     fi
     rlLogDebug "rljAddMetric: Storing metric $MID with value $VALUE and tolerance $TOLERANCE"
-    $__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
-        --value "$VALUE" --tolerance "$TOLERANCE" >&2
     rljPrintToMeta metric --type \""$1"\" --name \""$MID"\" \
         --value \""$VALUE"\" --tolerance \""$TOLERANCE"\" >&2
+    $__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
+        --value "$VALUE" --tolerance "$TOLERANCE" >&2
     return $?
 }
 
 rljAddMessage(){
-    $__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
     rljPrintToMeta log --message \""$1"\" --severity \""$2"\" >&2
+    $__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
 }
 
 rljRpmLog(){
-    $__INTERNAL_JOURNALIST rpm --package "$1" >&2
     rljPrintToMeta rpm --package \""$1"\" >&2
+    $__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
 # TODO Description
