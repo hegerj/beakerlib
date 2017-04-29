@@ -872,6 +872,10 @@ def updateXML(optparser, jrnl=None):
 
     metafile = os.environ['BEAKERLIB_METAFILE']
 
+    # TODO SMAZAT
+    with open("/home/jheger/mmm", 'a') as fh:
+        fh.write("when\n")
+
     # Opening metafile for reading and writing
     try:
         fh = open(metafile, 'r+')
@@ -903,6 +907,9 @@ def updateXML(optparser, jrnl=None):
     for line in lines[skipped_lines:]:
         line_count += 1
         (options, args) = optparser.parse_args(shlex.split(line))
+
+#        print args  # TODO SMAZAT
+#        print options
 
         # TODO How to replace ret_need?
         command = args[0]
@@ -1021,6 +1028,10 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     else:
         command = None
 
+
+#    print args
+#    print options
+
     # init/finphase/teststate/phasestate/printlog have different behaviour than other commands
     # these commands are processed immediately and their results a returned
     # to journal.sh
@@ -1036,13 +1047,13 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     if command == "finphase":
         #result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
-        #Journal._print("%s:%s:%s" % (type_r, result, name))
         #try:
         #   return int(score)
         #except:
         #   return 1
-        # updateXML(optparser, jrnl)
         print "finphase from ARGS"
+        updateXML(optparser, jrnl)
+        # Journal._print("%s:%s:%s" % (type_r, result, name))
         return 0
     elif command == "printlog":
         ret_need = need((options.severity, options.full_journal))

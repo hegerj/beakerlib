@@ -403,7 +403,7 @@ rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
-    echo "journal.sh out: $out"  # TODO SMAZAT
+    echo "journal.sh out: \"$out\"";   # TODO SMAZAT
     out=$($__INTERNAL_JOURNALIST finphase)
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
@@ -462,14 +462,15 @@ rljRpmLog(){
 # TODO Description
 # When calling this function all parameter values must be enclosed in escaped quotes (\"$1\")
 rljPrintToMeta(){
-    echo "$@" >> $BEAKERLIB_METAFILE
+    #echo "$@" >> $BEAKERLIB_METAFILE
     #printf %q "$@" >> $__INTERNAL_METAFILE
     #echo >> $__INTERNAL_METAFILE # TODO add newlining into printf comamnd
-    #for arg in $@
-    #do
-    #    printf %q "$arg " >> $__INTERNAL_METAFILE
-    #done
-    #echo >> $__INTERNAL_METAFILE
+    for arg in "$@"
+    do
+        printf %q "$arg" >> $BEAKERLIB_METAFILE
+        echo -n " " >> $BEAKERLIB_METAFILE
+    done
+    echo >> $BEAKERLIB_METAFILE
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
