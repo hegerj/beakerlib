@@ -97,8 +97,7 @@ rlJournalStart(){
     fi
 
     # finally intialize the journal
-    # TODO ADDED
-    #rljPrintToMeta init --test \""$TEST"\" >&2
+    # ADDED
     if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
@@ -360,7 +359,6 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
-    #rljPrintToMeta teststate >&2
     $__INTERNAL_JOURNALIST teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
@@ -381,7 +379,6 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
-    #rljPrintToMeta phasestate >&2
     $__INTERNAL_JOURNALIST phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
@@ -405,6 +402,7 @@ rljClosePhase(){
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
     echo "journal.sh out: \"$out\"";   # TODO SMAZAT
     out=$($__INTERNAL_JOURNALIST finphase)
+    # TODO cut everything from out besides last line
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
     local result="$(echo "$out" | cut -d ':' -f 2)"

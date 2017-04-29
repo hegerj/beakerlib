@@ -245,7 +245,7 @@ class Journal(object):
     # @staticmethod
     def createLog(severity, full_journal=False, jrnl=None):
         # Backward compability
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         Journal.printHeadLog("TEST PROTOCOL")
@@ -620,7 +620,7 @@ class Journal(object):
     # @staticmethod
     def addPhase(name, phase_type, jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         log = Journal.getLogEl(jrnl)
@@ -664,7 +664,7 @@ class Journal(object):
     # @staticmethod
     def finPhase(jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
@@ -702,7 +702,7 @@ class Journal(object):
     # @staticmethod
     def testState(jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         failed = 0
@@ -718,7 +718,7 @@ class Journal(object):
     # @staticmethod
     def phaseState(jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
@@ -732,7 +732,7 @@ class Journal(object):
     # @staticmethod
     def addMessage(message, severity, jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         log = Journal.getLogEl(jrnl)
@@ -754,7 +754,7 @@ class Journal(object):
     # @staticmethod
     def addTest(message, result="FAIL", command=None, jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         log = Journal.getLogEl(jrnl)
@@ -781,7 +781,7 @@ class Journal(object):
     # @staticmethod
     def logRpmVersion(package, jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         log = Journal.getLogEl(jrnl)
@@ -799,7 +799,7 @@ class Journal(object):
     # @staticmethod
     def addMetric(type, name, value, tolerance, jrnl=None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         log = Journal.getLogEl(jrnl)
@@ -824,7 +824,7 @@ class Journal(object):
     # @staticmethod
     def dumpJournal(type, jrnl = None):
         # Backward compatibility
-        if jrnl == None:
+        if jrnl is None:
             jrnl = Journal.openJournal()
 
         if type == "raw":
@@ -853,7 +853,7 @@ def need(args):
 # So we open it, add a test, add a FAIL to let the user know
 # he has a broken test, and close the phase again
 def testOutOfPhase(message=None, result=None, jrnl=None):
-    if jrnl == None:
+    if jrnl is None:
         jrnl = Journal.openJournal()
 
     Journal.addPhase("FAIL", "Asserts collected outside of a phase", jrnl=jrnl)
@@ -867,7 +867,7 @@ def testOutOfPhase(message=None, result=None, jrnl=None):
 
 # TODO DESCRIPTION
 def updateXML(optparser, jrnl=None):
-    if jrnl == None:
+    if jrnl is None:
         jrnl = Journal.openJournal()
 
     metafile = os.environ['BEAKERLIB_METAFILE']
@@ -1029,7 +1029,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         command = None
 
 
-#    print args
+#    print args   # TODO SMAZAT
 #    print options
 
     # init/finphase/teststate/phasestate/printlog have different behaviour than other commands
