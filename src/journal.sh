@@ -405,8 +405,7 @@ rljClosePhase(){
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
     # ADDED TODO describe
     out_last=${out##*$'\n'}
-    echo $out  # TODO SMAZAT
-    #echo "journal.sh out: \"$out\"";   # TODO SMAZAT
+    echo $out | tee -a "/home/jheger/frf"  # TODO SMAZAT ? rozhodne veci za |
     #out=$($__INTERNAL_JOURNALIST finphase)
     # TODO cut everything from out besides last line
     local score=$?
