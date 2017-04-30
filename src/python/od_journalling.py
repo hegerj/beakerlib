@@ -943,20 +943,20 @@ def updateXML(optparser, jrnl=None):
             #print "dump"  # TODO SMAZAT
             Journal.dumpJournal(options.type, jrnl=jrnl)
             continue
-        elif command == "addphase":
-            ret_need = need((options.name, options.type))
-            #sys.stderr.write("ADDPHASE name: " + str(options.name) + '\n' )  # TODO SMAZAT
-            if ret_need > 0:
-                #return ret_need
-                sys.stderr.write("SKIPPED 926\n")  # TODO SMAZAT
-                continue
-            ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
-            if ret_need > 0:
-                #return ret_need
-                sys.stderr.write("SKIPPED 931\n")  # TODO SMAZAT
-                continue
-            Journal.printHeadLog(options.name)   # TODO Does this work as expected? probably gets caught by finphsae
-            #print "addphase"   # TODO SMAZAT
+        # elif command == "addphase":
+        #     ret_need = need((options.name, options.type))
+        #     #sys.stderr.write("ADDPHASE name: " + str(options.name) + '\n' )  # TODO SMAZAT
+        #     if ret_need > 0:
+        #         #return ret_need
+        #         sys.stderr.write("SKIPPED 926\n")  # TODO SMAZAT
+        #         continue
+        #     ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
+        #     if ret_need > 0:
+        #         #return ret_need
+        #         sys.stderr.write("SKIPPED 931\n")  # TODO SMAZAT
+        #         continue
+        #     Journal.printHeadLog(options.name)   # TODO Does this work as expected? probably gets caught by finphsae
+        #     #print "addphase"   # TODO SMAZAT
             continue
         elif command == "log":
             ret_need = need((options.message,))
@@ -1096,18 +1096,18 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         except:
            return 1
         #print "finphase from ARGS"
-    # elif command == "addphase":
-    #     ret_need = need((options.name, options.type))
-    #     if ret_need > 0:
-    #         sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
-    #         return ret_need
-    #     ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
-    #     if ret_need > 0:
-    #         sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
-    #         return ret_need
-    #     sys.stderr.write("ADDPHASE name, type: " + str(options.name) + "; " + str(options.type) + '\n')  # TODO SMAZAT
-    #     Journal.printHeadLog(options.name)
-    #     updateXML(optparser, jrnl)   # TODO Does it make sense?
+    elif command == "addphase":
+        #sys.stderr.write("ADDPHASE name, type: " + str(options.name) + "; " + str(options.type) + '\n')  # TODO SMAZAT
+        updateXML(optparser, jrnl)  # TODO Does it make sense?
+        ret_need = need((options.name, options.type))
+        if ret_need > 0:
+            sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+            return ret_need
+        ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
+        if ret_need > 0:
+            sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+            return ret_need
+        Journal.printHeadLog(options.name)
     elif command == "printlog":
         ret_need = need((options.severity, options.full_journal))
         if ret_need > 0:

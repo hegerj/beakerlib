@@ -393,8 +393,8 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
-    #$__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
+    #rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
+    $__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
     #$__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
