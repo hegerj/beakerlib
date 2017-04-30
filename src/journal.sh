@@ -403,14 +403,15 @@ rljClosePhase(){
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
     # ADDED TODO describe
-    out=${out##*$'\n'}
+    out_last=${out##*$'\n'}
+    echo $out  # TODO SMAZAT
     #echo "journal.sh out: \"$out\"";   # TODO SMAZAT
     #out=$($__INTERNAL_JOURNALIST finphase)
     # TODO cut everything from out besides last line
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
-    local result="$(echo "$out" | cut -d ':' -f 2)"
-    local name=$(echo "$out" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
+    local result="$(echo "$out_last" | cut -d ':' -f 2)"
+    local name=$(echo "$out_last" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
     rlJournalPrintText > $logfile
     #$__INTERNAL_ONDEMAND_JOURNALIST  # TODO probably outdated by finphase calling updateXML
