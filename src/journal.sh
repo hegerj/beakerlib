@@ -180,9 +180,6 @@ rlJournalEnd(){
     local journaltext="$BEAKERLIB_DIR/journal.txt"
     rlJournalPrintText > $journaltext
 
-    # TODO Last interaction with journalling.py
-    $__INTERNAL_ONDEMAND_JOURNALIST
-
     if [ -z "$BEAKERLIB_COMMAND_SUBMIT_LOG" ]
     then
       local BEAKERLIB_COMMAND_SUBMIT_LOG="$__INTERNAL_DEFAULT_SUBMIT_LOG"
@@ -195,6 +192,9 @@ rlJournalEnd(){
         rlLog "JOURNAL XML: $journal"
         rlLog "JOURNAL TXT: $journaltext"
     fi
+
+    # TODO Last interaction with journalling.py
+    $__INTERNAL_ONDEMAND_JOURNALIST
 
 }
 
@@ -394,6 +394,7 @@ rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
     rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
+    #$__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
     #$__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
@@ -401,9 +402,9 @@ rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
-    # ADDED
+    # ADDED TODO describe
     out=${out##*$'\n'}
-    echo "journal.sh out: \"$out\"";   # TODO SMAZAT
+    #echo "journal.sh out: \"$out\"";   # TODO SMAZAT
     #out=$($__INTERNAL_JOURNALIST finphase)
     # TODO cut everything from out besides last line
     local score=$?

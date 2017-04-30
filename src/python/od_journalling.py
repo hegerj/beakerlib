@@ -559,16 +559,19 @@ class Journal(object):
 
     initializeJournal = staticmethod(initializeJournal)
 
+    # TODO THIS IS CALLED WAY TOO OFTEN
     # @staticmethod
-    def saveJournal(top_element):
+    def saveJournal(jrnl):
         journal = os.environ['BEAKERLIB_JOURNAL']
         try:
             output = open(journal, 'wb')
-            output.write(etree.tostring(top_element, xml_declaration=True, encoding='utf-8'))
+            output.write(etree.tostring(jrnl, xml_declaration=True, encoding='utf-8'))
             output.close()
             return 0
         except IOError, e:
-            Journal.printLog('Failed to save journal to %s: %s' % (top_element, str(e)), 'BEAKERLIB_WARNING')
+            # TODO REWORK all fails to write to stderr
+            Journal.printLog('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')
+            sys.stderr.write('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')  # TODO SMAZAT
             return 1
 
     saveJournal = staticmethod(saveJournal)
@@ -748,7 +751,8 @@ class Journal(object):
         msg.text = msgText
 
         add_to.append(msg)
-        return Journal.saveJournal(jrnl)   # TODO SMAZAT extra saveJournal?
+        #return Journal.saveJournal(jrnl)   # TODO SMAZAT extra saveJournal?
+        return 0
 
     addMessage = staticmethod(addMessage)
 
@@ -761,7 +765,14 @@ class Journal(object):
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
+        # TODO SMAZAT
+        # with open("/home/jheger/log.inc", "a") as fh:
+        #     fh.write(etree.tostring(log, pretty_print=True) + "\n\n")
+        # with open("/home/jheger/add.inc", "a") as fh:
+        #     fh.write(etree.tostring(add_to, pretty_print=True) + "\n\n")
+
         if add_to == log:  # no phase open
+            #sys.stderr.write("No phase OPEN!\n")   # TODO SMAZAT
             return 1
 
         message = unicode(message, 'utf-8', errors='replace')
@@ -775,7 +786,8 @@ class Journal(object):
         msg.text = result
         add_to.append(msg)
 
-        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        return 0
 
     addTest = staticmethod(addTest)
 
@@ -793,7 +805,8 @@ class Journal(object):
             pkgEl, pkgCon = pkg
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
-        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        return 0
 
     logRpmVersion = staticmethod(logRpmVersion)
 
@@ -818,7 +831,8 @@ class Journal(object):
         metric.text = str(value)
         add_to.append(metric)
 
-        return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
+        return 0
 
     addMetric = staticmethod(addMetric)
 
@@ -896,8 +910,9 @@ def updateXML(optparser, jrnl=None):
 
     # If no new commands were added to file
     # there is no need to read it
+    # TODO it is called fairly often, limit it somehow maybe?
     if len(lines) == skipped_lines:
-        sys.stderr.write("No change since last read meta 900\n")  # TODO SMAZAT
+        #sys.stderr.write("No change since last read meta 900\n")  # TODO SMAZAT
         fh.close()
         return 0
 
@@ -906,12 +921,16 @@ def updateXML(optparser, jrnl=None):
         line_count += 1
         (options, args) = optparser.parse_args(shlex.split(line))
 
-        sys.stderr.write("args: {0}\n".format(args))  # TODO SMAZAT
-        #sys.stderr.write("options: {0}\n".format(options))  # TODO SMAZAT
-        for key, value in vars(options).iteritems():  # TODO SMAZAT
-            if value:
-                sys.stderr.write(str(key)+ ": "+ str(value))
-                sys.stderr.write("\n")
+        # TODO SMAZAT
+        # sys.stderr.write("args: {0}\n".format(args))  # TODO SMAZAT
+        # for key, value in vars(options).iteritems():  # TODO SMAZAT
+        #     printed = False
+        #     if value:
+        #         sys.stderr.write(str(key)+ ": "+ str(value) + " | ")
+        #         #printed = True
+        #     #if printed:
+        #      #   sys.stderr.write("\n")
+        # sys.stderr.write("\n")
 
         # TODO How to replace ret_need?
         command = args[0]
@@ -926,6 +945,7 @@ def updateXML(optparser, jrnl=None):
             continue
         elif command == "addphase":
             ret_need = need((options.name, options.type))
+            #sys.stderr.write("ADDPHASE name: " + str(options.name) + '\n' )  # TODO SMAZAT
             if ret_need > 0:
                 #return ret_need
                 sys.stderr.write("SKIPPED 926\n")  # TODO SMAZAT
@@ -935,7 +955,7 @@ def updateXML(optparser, jrnl=None):
                 #return ret_need
                 sys.stderr.write("SKIPPED 931\n")  # TODO SMAZAT
                 continue
-            Journal.printHeadLog(options.name)   # TODO Does this work as expected?
+            Journal.printHeadLog(options.name)   # TODO Does this work as expected? probably gets caught by finphsae
             #print "addphase"   # TODO SMAZAT
             continue
         elif command == "log":
@@ -995,11 +1015,17 @@ def updateXML(optparser, jrnl=None):
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
     fh.close()
 
-    # TODO outdated comment asi vv
-    #  This save will be used when calling from journal.sh rlJournalEnd()
-    sys.stderr.write("End of updateXML()\n")
+
     # TODO SMAZAT
+    # sys.stderr.write("End of updateXML()\n")
+    # # TODO SMAZAT
+    # sys.stderr.write("updateXML() object: " + str(jrnl)+'\n')
+    # with open("/home/jheger/jrnl.prog", 'w') as fh:
+    #     fh.write(etree.tostring(jrnl, pretty_print=True))
+    #     fh.write("\n")
+
     Journal.saveJournal(jrnl)
+    # sys.stderr.write("EXIT CODE from save: " + str(exitcod) + '\n')  # TODO SMAZAT
     return 0
 
 
@@ -1046,11 +1072,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     else:
         command = None
 
-
-#    print args   # TODO SMAZAT
-#    print options
-
-    # init/finphase/teststate/phasestate/printlog have different behaviour than other commands
+    # TODO update comment
+    # These have different behaviour than other commands
     # these commands are processed immediately and their results a returned
     # to journal.sh
     if command == "init":
@@ -1064,14 +1087,27 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         jrnl = Journal.openJournal()
 
     if command == "finphase":
-        result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
         updateXML(optparser, jrnl)
+        result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
         Journal._print("%s:%s:%s" % (type_r, result, name))
+        #sys.stderr.write("FINPHASE " + str(name)+ '\n')  # TODO SMAZAT
         try:
            return int(score)
         except:
            return 1
         #print "finphase from ARGS"
+    # elif command == "addphase":
+    #     ret_need = need((options.name, options.type))
+    #     if ret_need > 0:
+    #         sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+    #         return ret_need
+    #     ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
+    #     if ret_need > 0:
+    #         sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+    #         return ret_need
+    #     sys.stderr.write("ADDPHASE name, type: " + str(options.name) + "; " + str(options.type) + '\n')  # TODO SMAZAT
+    #     Journal.printHeadLog(options.name)
+    #     updateXML(optparser, jrnl)   # TODO Does it make sense?
     elif command == "printlog":
         ret_need = need((options.severity, options.full_journal))
         if ret_need > 0:
