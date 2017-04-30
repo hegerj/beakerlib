@@ -45,8 +45,7 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
-# TODO CHANGE in Makefile
-__INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/od_journalling.py"
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # rlJournalStart
@@ -83,10 +82,8 @@ rlJournalStart(){
 
     [ -d "$BEAKERLIB_DIR" ] || mkdir -p "$BEAKERLIB_DIR"
 
-    # set global BeakerLib journal and metafile variables for future use
+    # set global BeakerLib journal variable for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
-    export BEAKERLIB_METAFILE="$BEAKERLIB_DIR/journal.meta"
-
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
@@ -95,16 +92,7 @@ rlJournalStart(){
         exit 1
     fi
 
-    touch $BEAKERLIB_METAFILE
-
-    # finally initialize the journal
-    if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
-        rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
-    else
-        echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
-        exit 1
-    fi
-
+    # finally intialize the journal
     if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
@@ -194,9 +182,6 @@ rlJournalEnd(){
         rlLog "JOURNAL TXT: $journaltext"
     fi
 
-    # TODO Last interaction with journalling.py
-    $__INTERNAL_ONDEMAND_JOURNALIST
-
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -256,8 +241,7 @@ Example:
 
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    rljPrintToMeta dump --type "$TYPE"
-    #$__INTERNAL_JOURNALIST dump --type "$TYPE"
+    $__INTERNAL_JOURNALIST dump --type "$TYPE"
 }
 
 # backward compatibility
@@ -334,9 +318,7 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    # ADDED
-    $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
-    #$__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
+    $__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
 }
 
 # backward compatibility
@@ -359,8 +341,7 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
-    $__INTERNAL_ONDEMAND_JOURNALIST teststate
-    #$__INTERNAL_JOURNALIST teststate >&2
+    $__INTERNAL_JOURNALIST teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -380,8 +361,7 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
-    $__INTERNAL_ONDEMAND_JOURNALIST phasestate
-    #$__INTERNAL_JOURNALIST phasestate >&2
+    $__INTERNAL_JOURNALIST phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -394,45 +374,33 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    #rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
-    $__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
-    #$__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
+    $__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
 rljClosePhase(){
     local out
-    # ADDED
-    out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
-    # ADDED TODO describe
-    out_last=${out##*$'\n'}
-    echo $out | tee -a "/home/jheger/frf"  # TODO SMAZAT ? rozhodne veci za |
-    #out=$($__INTERNAL_JOURNALIST finphase)
-    # TODO cut everything from out besides last line
+    out=$($__INTERNAL_JOURNALIST finphase)
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
-    local result="$(echo "$out_last" | cut -d ':' -f 2)"
-    local name=$(echo "$out_last" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
+    local result="$(echo "$out" | cut -d ':' -f 2)"
+    local name=$(echo "$out" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
     rlJournalPrintText > $logfile
-    #$__INTERNAL_ONDEMAND_JOURNALIST  # TODO probably outdated by finphase calling updateXML
     rlReport "$name" "$result" "$score" "$logfile"
 }
 
 rljAddTest(){
-    rljPrintToMeta test --message "$1" --result "$2" ${3:+--command "$3"} >&2
-    #if ! eval "$__INTERNAL_JOURNALIST test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
-    #then
+    if ! eval "$__INTERNAL_JOURNALIST test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
+    then
       # Failed to add a test: there is no phase open
       # So we open it, add a test, add a FAIL to let the user know
       # he has a broken test, and close the phase again
 
-      #rljAddPhase "FAIL" "Asserts collected outside of a phase"
-      #$__INTERNAL_JOURNALIST test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
-      #$__INTERNAL_JOURNALIST test --message "$1" --result "$2" >&2
-      #rljPrintToMeta test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
-      #rljPrintToMeta test --message "$1" --result "$2" >&2
-      #rljClosePhase
-    #fi
+      rljAddPhase "FAIL" "Asserts collected outside of a phase"
+      $__INTERNAL_JOURNALIST test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
+      $__INTERNAL_JOURNALIST test --message "$1" --result "$2" >&2
+      rljClosePhase
+    fi
 }
 
 rljAddMetric(){
@@ -445,35 +413,17 @@ rljAddMetric(){
         return 1
     fi
     rlLogDebug "rljAddMetric: Storing metric $MID with value $VALUE and tolerance $TOLERANCE"
-    rljPrintToMeta metric --type "$1" --name "$MID" \
+    $__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
         --value "$VALUE" --tolerance "$TOLERANCE" >&2
-    #$__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
-        #--value "$VALUE" --tolerance "$TOLERANCE" >&2
     return $?
 }
 
 rljAddMessage(){
-    rljPrintToMeta log --message "$1" --severity "$2" >&2
-    #$__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
+    $__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
 }
 
 rljRpmLog(){
-    rljPrintToMeta rpm --package "$1" >&2
-    #$__INTERNAL_JOURNALIST rpm --package "$1" >&2
-}
-
-# TODO Description
-# When calling this function all parameter values must be enclosed in escaped quotes (\"$1\")
-rljPrintToMeta(){
-    #echo "$@" >> $BEAKERLIB_METAFILE
-    #printf %q "$@" >> $__INTERNAL_METAFILE
-    #echo >> $__INTERNAL_METAFILE # TODO add newlining into printf comamnd
-    for arg in "$@"
-    do
-        printf %q "$arg" >> $BEAKERLIB_METAFILE
-        echo -n " " >> $BEAKERLIB_METAFILE
-    done
-    echo >> $BEAKERLIB_METAFILE
+    $__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
