@@ -97,6 +97,9 @@ rlJournalStart(){
 
     # finally intialize the journal
     # ADDED
+    echo -n "LIST $BEAKERLIB_DIR: "
+    file $BEAKERLIB_DIR
+    echo
     if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else

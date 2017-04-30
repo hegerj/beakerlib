@@ -643,6 +643,7 @@ class Journal(object):
         pkgdetails = Journal.collectPackageDetails(jrnl, [])
 
         for installed_pkg in pkgdetails:
+            installed_pkg[0].text = installed_pkg[1]
             phase.append(installed_pkg[0])
 
         log.append(phase)
@@ -889,9 +890,9 @@ def updateXML(optparser, jrnl=None):
 
     # Opening metafile for reading and writing
     try:
-        fh = open(metafile, 'r+')
-    except IOError:
-        Journal.printLog('Failed to open metafile', 'BEAKERLIB_WARNING')
+        fh = open(metafile, 'r+b')
+    except IOError as e:
+        Journal.printLog('Failed to open metafile with: ' + str(e) , 'BEAKERLIB_WARNING')
         return 1
 
     # Reading metafile by lines
