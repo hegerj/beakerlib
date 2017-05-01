@@ -45,6 +45,8 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
+# TODO CHANGE
+__INTERNAL_DAEMON_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/daemon_journalling.py"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,8 +84,10 @@ rlJournalStart(){
 
     [ -d "$BEAKERLIB_DIR" ] || mkdir -p "$BEAKERLIB_DIR"
 
-    # set global BeakerLib journal variable for future use
+    # set global BeakerLib variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
+    export BEAKERLIB_BASH_PIPE="$BEAKERLIB_DIR/bash_pipe"
+    export BEAKERLIB_PYTHON_PIPE="$BEAKERLIB_DIR/python_pipe"
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
@@ -92,7 +96,23 @@ rlJournalStart(){
         exit 1
     fi
 
-    # finally intialize the journal
+    # create named pipes
+    mkfifo $BEAKERLIB_BASH_PIPE 2>/dev/null
+    mkfifo $BEAKERLIB_PYTHON_PIPE 2>/dev/null
+
+    # start daemon journalist and store its PID
+    $__INTERNAL_DAEMON_JOURNALIST &
+    export DAEMON_PID=$!
+
+    # check if daemon is running
+    if ! kill -0 $DAEMON_PID 2>/dev/null; then
+        echo "rlJournalStart: Failed to start Journalling daemon."
+        echo "rlJournalStart: Cannot continue, exiting..."
+        exit 1
+    fi
+
+
+    # finally initialize the journal
     if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
@@ -426,6 +446,20 @@ rljRpmLog(){
     $__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
+# TODO reading wuth cat? something better?
+# TODO checking with kill? something better?
+# communicate with python daemon
+rljCallDaemon() {
+    # check if daemon is still running
+    if ! kill -0 $DAEMON_PID 2>/dev/null; then
+        echo "rljCallDaemon: Journalling daemon is not running."
+        echo "rljCallDaemon: Cannot continue, exiting..."
+        exit 1
+    fi
+    echo -n "$@" > $BEAKERLIB_BASH_PIPE
+    response=$(cat $BEAKERLIB_PYTHON_PIPE)
+    return 0
+}
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUTHORS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
