@@ -832,7 +832,7 @@ def argsParse(args_in=None):
     optparser.add_option("--type", default=None, dest="type")
     optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
 
-    if args_in == None:
+    if args_in is None:
         (options, args) = optparser.parse_args()
     else:
         (options, args) = optparser.parse_args(args_in)
@@ -841,11 +841,56 @@ def argsParse(args_in=None):
 
 
 def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
+    # TODO better Error handling
     if not 'BEAKERLIB_JOURNAL' in os.environ:
         print "BEAKERLIB_JOURNAL not defined in the environment"
         return 1
 
-    return 0
+    if not 'BEAKERLIB_BASH_PIPE' in os.environ:
+        print "BEAKERLIB_BASH_PIPE not defined in the environment"
+        return 1
+
+    if not 'BEAKERLIB_PYTHON_PIPE' in os.environ:
+        print "BEAKERLIB_PYTHON_PIPE not defined in the environment"
+        return 1
+
+
+    bash_pipe= os.environ['BEAKERLIB_BASH_PIPE']
+    python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE']
+
+    # Main loop
+    while True:
+        try:
+            os.stat(bash_pipe)
+        except:  # TODO better Error handling
+            print "{0} does not exist".format(bash_pipe)
+            return 1
+
+        pipe_read = ""
+        # reading from pipe as log as something is there
+        with open(bash_pipe) as bp:
+            while True:
+                data = bp.read()
+                if len(data) == 0:
+                    break
+                pipe_read += data
+
+        print "python print:  {0}".format(pipe_read)
+
+        #pipe_write = argsParse(pipe_read)
+        pipe_write = "ress"   # TODO SMAZAT
+
+        try:
+            os.stat(python_pipe)
+        except:  # TODO better Error handling
+            print "{0} does not exist".format(python_pipe)
+            return 1
+
+        pp = open(python_pipe, 'w')
+        pp.write("{0}\n".format(pipe_write))
+        pp.close()
+
+
     # args_in = [_1, _2, _3, _4, _5, _6, _7, _8, _9, _10]
     # if len(reduce(lambda x, y: x + y, args_in)) > 0:
     #   (options, args) = argsParse(args_in)

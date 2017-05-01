@@ -453,9 +453,10 @@ rljRpmLog(){
 # communicate with python daemon
 rljCallDaemon() {
     # check if daemon is still running
-    if ! pgrep $__INTERNAL_DAEMON_JOURNALIST > /dev/null; then
+    if ! pgrep -f $__INTERNAL_DAEMON_JOURNALIST > /dev/null; then
         echo "rljCallDaemon: Failed to find running Journalling daemon."
         echo "rljCallDaemon: Cannot continue, exiting..."
+        kill $(pgrep $__INTERNAL_DAEMON_JOURNALIST) 2>/dev/null  # TODO change to not call pgrep 2x
         exit 1
     fi
 
@@ -466,8 +467,20 @@ rljCallDaemon() {
     echo -n "$@" > $BEAKERLIB_BASH_PIPE
     # read from python_pipe
     response=$(cat $BEAKERLIB_PYTHON_PIPE)
+    echo $response
     return 0
 }
+
+# TODO SMAZAT vv
+export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
+export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
+export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
+$__INTERNAL_DAEMON_JOURNALIST &
+rljCallDaemon test
+kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
+exit 19
+# TODO SMAZAT ^^
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUTHORS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
