@@ -468,7 +468,7 @@ rljCallDaemon() {
     # read from python_pipe
     response=$(cat $BEAKERLIB_PYTHON_PIPE)
     echo $response
-    return 0
+    return 0 # TODO if $response is supposed to be string or int decision
 }
 
 # TODO SMAZAT vv
@@ -476,7 +476,7 @@ export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
 export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
 export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
 $__INTERNAL_DAEMON_JOURNALIST &
-rljCallDaemon test
+rljCallDaemon log --message "messagia" --severity "INFO" >&2
 kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
 exit 19
 # TODO SMAZAT ^^

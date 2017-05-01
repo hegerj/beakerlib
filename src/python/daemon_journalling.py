@@ -31,6 +31,7 @@ import rpm
 import socket
 import types
 from lxml import etree
+import shlex
 
 timeFormat = "%Y-%m-%d %H:%M:%S %Z"
 xmlForbidden = (0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, \
@@ -677,15 +678,15 @@ class Journal(object):
 
     finPhase = staticmethod(finPhase)
 
-    # TODO not used? Error in  'name' var
-    # @staticmethod
-    def getPhase(tree):
-        for node in tree.xpath("phase"):
-            if node.getAttribute("name") == name:
-                return node
-        return tree
-
-    getPhase = staticmethod(getPhase)
+    # # TODO not used? Error in  'name' var
+    # # @staticmethod
+    # def getPhase(tree):
+    #     for node in tree.xpath("phase"):
+    #         if node.getAttribute("name") == name:
+    #             return node
+    #     return tree
+    #
+    # getPhase = staticmethod(getPhase)
 
     # @staticmethod
     def testState():
@@ -815,7 +816,94 @@ def need(args):
 
 
 # TODO COMMENT
-def argsParse(args_in=None):
+def inputParse(pipe_read, optparser, jrnl=None):
+    if jrnl is None:
+        jrnl = Journal.openJournal()
+
+
+    (options, args) = optparser.parse_args(shlex.split(pipe_read))
+
+    if args:
+        command = args[0]
+    else:
+        return "ArgError"  # TODO improve, and check for it in main loop
+
+    if command == "init":
+      ret_need = need((options.test, ))
+      if ret_need > 0:
+        return ret_need
+      package = Journal.determinePackage(options.test)
+      pipe_write = Journal.initializeJournal(options.test, package)
+    elif command == "dump":
+      ret_need = need((options.type, ))
+      if ret_need > 0:
+        return ret_need
+      Journal.dumpJournal(options.type)
+    elif command == "printlog":
+      ret_need = need((options.severity, options.full_journal))
+      if ret_need > 0:
+        return ret_need
+      Journal.createLog(options.severity, options.full_journal)
+    elif command == "addphase":
+      ret_need = need((options.name, options.type))
+      if ret_need > 0:
+        return ret_need
+      ret_need = Journal.addPhase(options.name, options.type)
+      if ret_need > 0:
+        return ret_need
+      Journal.printHeadLog(options.name)
+    elif command == "log":
+      ret_need = need((options.message, ))
+      if ret_need > 0:
+        return ret_need
+      severity = options.severity
+      if severity is None:
+        severity = "LOG"
+      return Journal.addMessage(options.message, severity)
+    elif command == "test":
+      ret_need = need((options.message, ))
+      if ret_need > 0:
+        return ret_need
+      result = options.result
+      if result is None:
+        result = "FAIL"
+      if Journal.addTest(options.message, result, options.command):
+        return 1
+      Journal.printLog(options.message, result)
+    elif command == "metric":
+      ret_need = need((options.name, options.type, options.value, options.tolerance))
+      if ret_need > 0:
+        return ret_need
+      try:
+        return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
+      except:
+        return 1
+    elif command == "finphase":
+      result, score, type_r, name = Journal.finPhase()
+      Journal._print("%s:%s:%s" % (type_r, result, name))
+      try:
+        return int(score)
+      except:
+        return 1
+    elif command == "teststate":
+      failed = Journal.testState()
+      return failed
+    elif command == "phasestate":
+      failed = Journal.phaseState()
+      return failed
+    elif command == "rpm":
+      ret_need = need((options.package, ))
+      if ret_need > 0:
+        return ret_need
+      Journal.logRpmVersion(options.package)
+
+
+    pipe_write = "aAa" # TODO SMAZAT
+
+    return pipe_write
+
+
+def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     DESCRIPTION = "Wrapper for operations above BeakerLib journal"
     optparser = OptionParser(description=DESCRIPTION)
 
@@ -832,15 +920,6 @@ def argsParse(args_in=None):
     optparser.add_option("--type", default=None, dest="type")
     optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
 
-    if args_in is None:
-        (options, args) = optparser.parse_args()
-    else:
-        (options, args) = optparser.parse_args(args_in)
-
-    return (options, args)
-
-
-def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     # TODO better Error handling
     if not 'BEAKERLIB_JOURNAL' in os.environ:
         print "BEAKERLIB_JOURNAL not defined in the environment"
@@ -857,6 +936,14 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     bash_pipe= os.environ['BEAKERLIB_BASH_PIPE']
     python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE']
+
+    ret_code = Journal.initializeJournal()
+    if ret_code == 1:
+        # TODO Change Error handling + think of better way how to end it
+        print "daemon_journalling.py: Failed to initialize the journal. Bailing out..."
+        exit(1)
+
+    jrnl = Journal.openJournal()  # TODO CHANGE
 
     # Main loop
     while True:
@@ -877,8 +964,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
         print "python print:  {0}".format(pipe_read)
 
-        #pipe_write = argsParse(pipe_read)
-        pipe_write = "ress"   # TODO SMAZAT
+        pipe_write = inputParse(pipe_read, optparser, jrnl=jrnl)
+        #pipe_write = "ress"   # TODO SMAZAT
 
         try:
             os.stat(python_pipe)
