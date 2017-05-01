@@ -100,7 +100,7 @@ rlJournalStart(){
     mkfifo $BEAKERLIB_BASH_PIPE 2>/dev/null
     mkfifo $BEAKERLIB_PYTHON_PIPE 2>/dev/null
 
-    # start daemon journalist and store its PID
+    # start daemon journalist and store its PID  # TODO need to export?
     $__INTERNAL_DAEMON_JOURNALIST &
     export DAEMON_PID=$!
 
@@ -201,7 +201,9 @@ rlJournalEnd(){
         rlLog "JOURNAL XML: $journal"
         rlLog "JOURNAL TXT: $journaltext"
     fi
-
+    # kill daemon
+    PID=$(pgrep $__INTERNAL_DAEMON_JOURNALIST)
+    kill $PID
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -446,17 +448,23 @@ rljRpmLog(){
     $__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
-# TODO reading wuth cat? something better?
-# TODO checking with kill? something better?
+# TODO reading with cat? something better?
+# TODO checking with pgrep? something better?
 # communicate with python daemon
 rljCallDaemon() {
     # check if daemon is still running
-    if ! kill -0 $DAEMON_PID 2>/dev/null; then
-        echo "rljCallDaemon: Journalling daemon is not running."
+    if ! pgrep $__INTERNAL_DAEMON_JOURNALIST > /dev/null; then
+        echo "rljCallDaemon: Failed to find running Journalling daemon."
         echo "rljCallDaemon: Cannot continue, exiting..."
         exit 1
     fi
+
+    # TODO SMAZAT test if PID persists
+    echo "DAEMON_PID: $DAEMON_PID REMOVE ME"
+
+    # write to bash_pipe
     echo -n "$@" > $BEAKERLIB_BASH_PIPE
+    # read from python_pipe
     response=$(cat $BEAKERLIB_PYTHON_PIPE)
     return 0
 }
