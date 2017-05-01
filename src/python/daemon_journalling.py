@@ -777,34 +777,46 @@ def need(args):
     print "Specified command is missing a required option"
     return 1
 
-def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
-  DESCRIPTION = "Wrapper for operations above BeakerLib journal"
-  optparser = OptionParser(description=DESCRIPTION)
+# TODO COMMENT
+def argsParse(args_in=None):
+    DESCRIPTION = "Wrapper for operations above BeakerLib journal"
+    optparser = OptionParser(description=DESCRIPTION)
 
-  optparser.add_option("-p", "--package", default=None, dest="package", metavar="PACKAGE")
-  optparser.add_option("-t", "--test", default=None, dest="test", metavar="TEST")
-  optparser.add_option("-n", "--name", default=None, dest="name", metavar="NAME")
-  optparser.add_option("-s", "--severity", default=None, dest="severity", metavar="SEVERITY")
-  optparser.add_option("-f", "--full-journal", action="store_true", default=False, dest="full_journal", metavar="FULL_JOURNAL")
-  optparser.add_option("-m", "--message", default=None, dest="message", metavar="MESSAGE")
-  optparser.add_option("-r", "--result", default=None, dest="result")
-  optparser.add_option("-v", "--value", default=None, dest="value")
-  optparser.add_option("--tolerance", default=None, dest="tolerance")
-  optparser.add_option("--type", default=None, dest="type")
-  optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
+    optparser.add_option("-p", "--package", default=None, dest="package", metavar="PACKAGE")
+    optparser.add_option("-t", "--test", default=None, dest="test", metavar="TEST")
+    optparser.add_option("-n", "--name", default=None, dest="name", metavar="NAME")
+    optparser.add_option("-s", "--severity", default=None, dest="severity", metavar="SEVERITY")
+    optparser.add_option("-f", "--full-journal", action="store_true", default=False, dest="full_journal",
+                         metavar="FULL_JOURNAL")
+    optparser.add_option("-m", "--message", default=None, dest="message", metavar="MESSAGE")
+    optparser.add_option("-r", "--result", default=None, dest="result")
+    optparser.add_option("-v", "--value", default=None, dest="value")
+    optparser.add_option("--tolerance", default=None, dest="tolerance")
+    optparser.add_option("--type", default=None, dest="type")
+    optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
+
+
+    if args_in == None:
+        (options, args) = optparser.parse_args()
+    else:
+        (options, args) = optparser.parse_args(args_in)
+
+    return (options,args)
+
+
+def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
+  if not 'BEAKERLIB_JOURNAL' in os.environ:
+    print "BEAKERLIB_JOURNAL not defined in the environment"
+    return 1
 
   args_in = [_1, _2, _3, _4, _5, _6, _7, _8, _9, _10]
   if len(reduce(lambda x, y: x + y, args_in)) > 0:
-    (options, args) = optparser.parse_args(args_in)
+    (options, args) = argsParse(args_in)
   else:
-    (options, args) = optparser.parse_args()
+    (options, args) = argsParse()
 
   if len(args) != 1:
     print "Non-option arguments present, argc: %s" % len(args)
-    return 1
-
-  if not 'BEAKERLIB_JOURNAL' in os.environ:
-    print "BEAKERLIB_JOURNAL not defined in the environment"
     return 1
 
   command = args[0]
