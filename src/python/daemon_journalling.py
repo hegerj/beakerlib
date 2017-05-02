@@ -819,28 +819,28 @@ def need(args):
 # TODO describe
 def signalHandler(signal, frame):
     # print "Signal received ",signal,"==",frame;
-    print "Received signal {0}".format(signal)
-    global jrnl
+    print "Received signal %s" % signal
+    global jrnl  # TODO How did you handle global jrnl?
     if jrnl is None:
-        print "Failed to save journal {0}".format(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+        print "Failed to save journal %s" % str(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
         exit(1)
     else:
         if Journal.saveJournal(jrnl):
-            print "Failed to save journal {0}".format(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+            print "Failed to save journal %s"% str(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
             exit(1)
-        print "Saved journal to {0}".format(os.environ['BEAKERLIB_JOURNAL'])
+        print "Saved journal to %s" % str(os.environ['BEAKERLIB_JOURNAL'])
         exit(0)
 
 
-# TODO add more signals
+# TODO add more signals?
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
 
 
 # TODO COMMENT
 def inputParse(pipe_read, optparser, jrnl=None):
-    if jrnl is None:
-        jrnl = Journal.openJournal()
+    #if jrnl is None:
+    #    jrnl = Journal.openJournal()
 
     (options, args) = optparser.parse_args(shlex.split(pipe_read))
 
@@ -853,80 +853,83 @@ def inputParse(pipe_read, optparser, jrnl=None):
     message = ""
     ret_code = 0
 
-    if command == "init":
-        ret_need = need((options.test,))
-        if ret_need > 0:
-            return ret_need
-        package = Journal.determinePackage(options.test)
-        pipe_write = Journal.initializeJournal(options.test, package)  # TODO CHANGE? maybe just save, or maybe nothimg?
-    elif command == "dump":
-        ret_need = need((options.type,))
-        if ret_need > 0:
-            return ret_need
-        Journal.dumpJournal(options.type)
-    elif command == "printlog":
-        ret_need = need((options.severity, options.full_journal))
-        if ret_need > 0:
-            return ret_need
-        Journal.createLog(options.severity, options.full_journal)
-    elif command == "addphase":
-        ret_need = need((options.name, options.type))
-        if ret_need > 0:
-            return ret_need
-        ret_need = Journal.addPhase(options.name, options.type)
-        if ret_need > 0:
-            return ret_need
-        Journal.printHeadLog(options.name)
-    elif command == "log":
-        ret_need = need((options.message,))
-        if ret_need > 0:
-            return ret_need
-        severity = options.severity
-        if severity is None:
-            severity = "LOG"
-        return Journal.addMessage(options.message, severity)
-    elif command == "test":
-        ret_need = need((options.message,))
-        if ret_need > 0:
-            return ret_need
-        result = options.result
-        if result is None:
-            result = "FAIL"
-        if Journal.addTest(options.message, result, options.command):
-            return 1
-        Journal.printLog(options.message, result)
-    elif command == "metric":
-        ret_need = need((options.name, options.type, options.value, options.tolerance))
-        if ret_need > 0:
-            return ret_need
-        try:
-            return Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
-        except:
-            return 1
-    elif command == "finphase":
-        result, score, type_r, name = Journal.finPhase()
-        Journal._print("%s:%s:%s" % (type_r, result, name))
-        try:
-            return int(score)
-        except:
-            return 1
-    elif command == "teststate":
-        failed = Journal.testState()
-        return failed
-    elif command == "phasestate":
-        failed = Journal.phaseState()
-        return failed
-    elif command == "rpm":
-        ret_need = need((options.package,))
-        if ret_need > 0:
-            return ret_need
-        Journal.logRpmVersion(options.package)
+    print args
+    print options
+
+    # if command == "init":
+    #     ret_need = need((options.test,))
+    #     if ret_need > 0:
+    #        ret_code = ret_need
+    #     package = Journal.determinePackage(options.test)
+    #     ret_code = Journal.initializeJournal(options.test, package)  # TODO CHANGE? maybe just save, or maybe nothimg?
+    # elif command == "dump":
+    #     ret_need = need((options.type,))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     Journal.dumpJournal(options.type)
+    # elif command == "printlog":
+    #     ret_need = need((options.severity, options.full_journal))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     Journal.createLog(options.severity, options.full_journal)
+    # elif command == "addphase":
+    #     ret_need = need((options.name, options.type))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     ret_need = Journal.addPhase(options.name, options.type)
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     Journal.printHeadLog(options.name)
+    # elif command == "log":
+    #     ret_need = need((options.message,))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     severity = options.severity
+    #     if severity is None:
+    #         severity = "LOG"
+    #     ret_code = Journal.addMessage(options.message, severity)
+    # elif command == "test":
+    #     ret_need = need((options.message,))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     result = options.result
+    #     if result is None:
+    #         result = "FAIL"
+    #     if Journal.addTest(options.message, result, options.command):
+    #         ret_code = 1
+    #     Journal.printLog(options.message, result)
+    # elif command == "metric":
+    #     ret_need = need((options.name, options.type, options.value, options.tolerance))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     try:
+    #         ret_code = Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance))
+    #     except:
+    #         ret_code = 1
+    # elif command == "finphase":
+    #     result, score, type_r, name = Journal.finPhase()
+    #     message = "%s:%s:%s" % (type_r, result, name)
+    #     try:
+    #         ret_code = int(score)
+    #     except:
+    #         ret_code = 1
+    # elif command == "teststate":
+    #     failed = Journal.testState()
+    #     ret_code = failed
+    # elif command == "phasestate":
+    #     failed = Journal.phaseState()
+    #     ret_code = failed
+    # elif command == "rpm":
+    #     ret_need = need((options.package,))
+    #     if ret_need > 0:
+    #         ret_code = ret_need
+    #     Journal.logRpmVersion(options.package)
 
     # TODO SMAZAT
     message = "aAa"
-    ret_code = 0
+    ret_code = 99
     # creating return message
-    pipe_write = "message:{0}-code:{1}".format(message, ret_code)
+    pipe_write = "message:%s-code:%s" % (message, str(ret_code))
 
     return pipe_write
 
@@ -970,21 +973,23 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     bash_pipe = os.environ['BEAKERLIB_BASH_PIPE']
     python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE']
 
-    ret_code = Journal.initializeJournal()
-    if ret_code == 1:
-        # TODO Change Error handling + think of better way how to end it
-        print "daemon_journalling.py: Failed to initialize the journal. Bailing out..."
-        exit(1)
+    # ret_code = Journal.initializeJournal()
+    # if ret_code == 1:
+    #     # TODO Change Error handling + think of better way how to end it
+    #     print "daemon_journalling.py: Failed to initialize the journal. Bailing out..."
+    #     exit(1)
+    #
+    # global jrnl
+    # jrnl = Journal.openJournal()  # TODO CHANGE?
 
     global jrnl
-    jrnl = Journal.openJournal()  # TODO CHANGE?
 
     # Main loop
     while True:
         try:
             os.stat(bash_pipe)
         except:  # TODO better Error handling
-            print "{0} does not exist".format(bash_pipe)
+            print "%s does not exist" % str(bash_pipe)
             return 1
 
         pipe_read = ""
@@ -996,19 +1001,19 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        print "python print:  {0}".format(pipe_read)
+        print "python print:  {0}".format(pipe_read)  # TODO SMAZAT
 
         pipe_write = inputParse(pipe_read, optparser, jrnl=jrnl)
-        # pipe_write = "ress"   # TODO SMAZAT
+        #pipe_write = "ress"   # TODO SMAZAT
 
         try:
             os.stat(python_pipe)
         except:  # TODO better Error handling
-            print "{0} does not exist".format(python_pipe)
+            print "%s does not exist" % str(python_pipe)
             return 1
 
         pp = open(python_pipe, 'w')
-        pp.write("{0}\n".format(pipe_write))
+        pp.write("%s\n" % pipe_write)
         pp.close()
 
 

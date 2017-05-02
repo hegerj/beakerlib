@@ -477,8 +477,9 @@ rljCallDaemon() {
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
-        echo "message: ${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
-        #echo "code: ${BASH_REMATCH[2]}"
+        echo -n "message: ${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
+        echo  # TODO SMAZAT
+        #echo "code: ${BASH_REMATCH[2]}"  # TODO SMAZAT
         return "${BASH_REMATCH[2]}"
     else
         return 1
@@ -492,7 +493,8 @@ export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
 export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
 export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
 $__INTERNAL_DAEMON_JOURNALIST &
-rljCallDaemon log --message "messagia" --severity "INFO" >&2
+rljCallDaemon metric --type "runtime" --name "mid" \
+        --value "vallua" --tolerance "tileraance" >&2
 kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
 exit 19
 # TODO SMAZAT ^^
