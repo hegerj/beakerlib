@@ -32,6 +32,8 @@ import socket
 import types
 from lxml import etree
 import shlex
+import signal
+
 
 timeFormat = "%Y-%m-%d %H:%M:%S %Z"
 xmlForbidden = (0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, \
@@ -815,6 +817,27 @@ def need(args):
         return 1
 
 
+# TODO describe
+def signalHandler(signal,frame):
+    #print "Signal received ",signal,"==",frame;
+    print "Received signal {0}".format(signal)
+    global jrnl
+    if jrnl is None:
+        print "Failed to save journal {0}".format(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+        exit(1)
+    else:
+        if Journal.saveJournal(jrnl):
+            print "Failed to save journal {0}".format(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+            exit(1)
+        print "Saved journal to {0}".format(os.environ['BEAKERLIB_JOURNAL'])
+        exit(0)
+
+
+# TODO add more signals
+signal.signal(signal.SIGINT,signalHandler)
+signal.signal(signal.SIGTERM, signalHandler)
+
+
 # TODO COMMENT
 def inputParse(pipe_read, optparser, jrnl=None):
     if jrnl is None:
@@ -828,12 +851,16 @@ def inputParse(pipe_read, optparser, jrnl=None):
     else:
         return "ArgError"  # TODO improve, and check for it in main loop
 
+    # vars to return to journal.sh
+    message = ""
+    ret_code = 0
+
     if command == "init":
       ret_need = need((options.test, ))
       if ret_need > 0:
         return ret_need
       package = Journal.determinePackage(options.test)
-      pipe_write = Journal.initializeJournal(options.test, package)
+      pipe_write = Journal.initializeJournal(options.test, package) # TODO CHANGE? maybe just save, or maybe nothimg?
     elif command == "dump":
       ret_need = need((options.type, ))
       if ret_need > 0:
@@ -897,11 +924,17 @@ def inputParse(pipe_read, optparser, jrnl=None):
         return ret_need
       Journal.logRpmVersion(options.package)
 
-
-    pipe_write = "aAa" # TODO SMAZAT
+    # TODO SMAZAT
+    message = "aAa"
+    ret_code = 0
+    # creating return message
+    pipe_write = "message:{0}-code:{1}".format(message,ret_code)
 
     return pipe_write
 
+# using global variable for it to be accessible by signalHandler
+jrnl = None
+# TODO global optparser?
 
 def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     DESCRIPTION = "Wrapper for operations above BeakerLib journal"
@@ -937,13 +970,15 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     bash_pipe= os.environ['BEAKERLIB_BASH_PIPE']
     python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE']
 
+
     ret_code = Journal.initializeJournal()
     if ret_code == 1:
         # TODO Change Error handling + think of better way how to end it
         print "daemon_journalling.py: Failed to initialize the journal. Bailing out..."
         exit(1)
 
-    jrnl = Journal.openJournal()  # TODO CHANGE
+    global jrnl
+    jrnl = Journal.openJournal()  # TODO CHANGE?
 
     # Main loop
     while True:
