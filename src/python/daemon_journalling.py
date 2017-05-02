@@ -45,6 +45,10 @@ termColors = {
     "WARNING": "\033[0;33m"}
 
 
+# using global variable for journal object
+jrnl = None
+
+
 class Journal(object):
     # @staticmethod
     def wrap(text, width):
@@ -245,7 +249,9 @@ class Journal(object):
 
     # @staticmethod
     def createLog(severity, full_journal=False):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         Journal.printHeadLog("TEST PROTOCOL")
         phasesFailed = 0
         phasesProcessed = 0
@@ -580,15 +586,21 @@ class Journal(object):
 
     # @staticmethod
     def openJournal():
-        try:
-            jrnl = Journal._openJournal()
-        except (IOError, EOFError):
-            Journal.printLog('Journal not initialised? Trying it now.', 'BEAKERLIB_WARNING')
-            envTest = os.environ.get("TEST")
-            package = Journal.determinePackage(envTest)
-            Journal.initializeJournal(envTest, package)
-            jrnl = Journal._openJournal()
-        return jrnl
+        global jrnl
+        # if there is already something in jrnl, return it
+        # else open from file or initialize it if the file doesn't exist
+        if jrnl is None:
+            try:
+                jrnl = Journal._openJournal()
+            except (IOError, EOFError):
+                Journal.printLog('Journal not initialised? Trying it now.', 'BEAKERLIB_WARNING')
+                envTest = os.environ.get("TEST")
+                package = Journal.determinePackage(envTest)
+                Journal.initializeJournal(envTest, package)
+                jrnl = Journal._openJournal()
+            return jrnl
+        else:
+            return jrnl
 
     openJournal = staticmethod(openJournal)
 
@@ -616,7 +628,9 @@ class Journal(object):
 
     # @staticmethod
     def addPhase(name, phase_type):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         log = Journal.getLogEl(jrnl)
 
         name = unicode(name, 'utf-8', errors='replace')
@@ -657,7 +671,9 @@ class Journal(object):
 
     # @staticmethod
     def finPhase():
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         type = phase.get('type')
         name = phase.get('name')
@@ -690,7 +706,9 @@ class Journal(object):
 
     # @staticmethod
     def testState():
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         failed = 0
 
         for phase in jrnl.xpath('phase'):
@@ -703,7 +721,9 @@ class Journal(object):
 
     # @staticmethod
     def phaseState():
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         failed = Journal.getPhaseState(phase)[1]
         if failed > 255:
@@ -714,7 +734,9 @@ class Journal(object):
 
     # @staticmethod
     def addMessage(message, severity):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -733,7 +755,9 @@ class Journal(object):
 
     # @staticmethod
     def addTest(message, result="FAIL", command=None):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -757,7 +781,9 @@ class Journal(object):
 
     # @staticmethod
     def logRpmVersion(package):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
         ts = rpm.ts()
@@ -772,7 +798,9 @@ class Journal(object):
 
     # @staticmethod
     def addMetric(type, name, value, tolerance):
-        jrnl = Journal.openJournal()
+        global jrnl
+        if jrnl is None:
+            jrnl = Journal.openJournal()
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
@@ -794,10 +822,11 @@ class Journal(object):
 
     # @staticmethod
     def dumpJournal(type):
+        global jrnl
         if type == "raw":
-            print etree.tostring(Journal.openJournal(), encoding="utf-8", xml_declaration=True)
+            print etree.tostring(jrnl, encoding="utf-8", xml_declaration=True)
         elif type == "pretty":
-            print etree.tostring(Journal.openJournal(), pretty_print=True, encoding="utf-8", xml_declaration=True)
+            print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
         else:
             print "Journal dump error: bad type specification"
 
@@ -940,9 +969,6 @@ def inputParse(pipe_read, optparser):
 
     return pipe_write
 
-
-# using global variable
-jrnl = None
 
 
 # TODO global optparser?
