@@ -456,7 +456,6 @@ rljCallDaemon() {
     if ! pgrep -f $__INTERNAL_DAEMON_JOURNALIST > /dev/null; then
         echo "rljCallDaemon: Failed to find running Journalling daemon."
         echo "rljCallDaemon: Cannot continue, exiting..."
-        kill $(pgrep $__INTERNAL_DAEMON_JOURNALIST) 2>/dev/null  # TODO change to not call pgrep 2x
         exit 1
     fi
 
@@ -465,13 +464,30 @@ rljCallDaemon() {
 
     # write to bash_pipe
     echo -n "$@" > $BEAKERLIB_BASH_PIPE
+    if [[ $? -ne 0 ]]; then
+        return 1
+    fi
     # read from python_pipe
     response=$(cat $BEAKERLIB_PYTHON_PIPE)
-    echo $response
-    return 0 # TODO if $response is supposed to be string or int decision
+    if [[ $? -ne 0 ]]; then
+        return 1
+    fi
+
+    echo $response # TODO SMAZAT
+
+    # parse to daemon answer
+    if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
+        echo "message: ${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
+        #echo "code: ${BASH_REMATCH[2]}"
+        return "${BASH_REMATCH[2]}"
+    else
+        return 1
+    fi
+
+    #return 0 # TODO if $response is supposed to be string or int decision
 }
 
-# TODO SMAZAT vv
+# TODO SMAZAT vv Prevents make install
 export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
 export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
 export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
