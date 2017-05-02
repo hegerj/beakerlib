@@ -846,17 +846,18 @@ def need(args):
 
 # TODO describe
 def signalHandler(signal, frame):
-    # print "Signal received ",signal,"==",frame;
-    print "Received signal %s" % signal
+    journal = os.environ['BEAKERLIB_JOURNAL']
+    print "daemon_journalling.py: Received signal %s" % signal
     # using global variable
+    global jrnl
     if jrnl is None:
-        print "Failed to save journal %s" % str(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+        print "daemon_journalling.py: Failed to save journal %s  exiting...1" % journal  # TODO Error handling SMAZAT 1 a 2 AT THE END OF STRING!!!!!
         exit(1)
     else:
         if Journal.saveJournal(jrnl):
-            print "Failed to save journal %s"% str(os.environ['BEAKERLIB_JOURNAL'])  # TODO Error handling
+            print "daemon_journalling.py: Failed to save journal %s  exiting...2" % journal  # TODO Error handling
             exit(1)
-        print "Saved journal to %s" % str(os.environ['BEAKERLIB_JOURNAL'])
+        print "daemon_journalling.py: Saved journal to %s. Exiting..." % journal
         exit(0)
 
 
@@ -876,10 +877,12 @@ def inputParse(pipe_read, optparser):
 
     if args:
         command = args[0]
+        print "COMMAND: %s" % command
     else:
         # something is wrong do nothing and return 1
         command = ""
         ret_code = 1
+
 
     if command == "init":
         # change global jrnl var
@@ -961,9 +964,6 @@ def inputParse(pipe_read, optparser):
             ret_code = ret_need
         Journal.logRpmVersion(options.package)
 
-    # TODO SMAZAT
-    message = "aAa"
-    ret_code = 99
     # creating return message
     pipe_write = "message:%s-code:%s" % (message, str(ret_code))
 
@@ -1008,6 +1008,11 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     # Main loop
     while True:
+
+        global jrnl  # TODO SMAZAT
+        with open("/home/jheger/obj", 'a') as fh:
+            fh.write("{0}\n".format(jrnl))   # TODO SMAZAT !
+
         try:
             os.stat(bash_pipe)
         except:  # TODO better Error handling

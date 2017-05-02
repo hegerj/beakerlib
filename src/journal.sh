@@ -202,7 +202,7 @@ rlJournalEnd(){
         rlLog "JOURNAL TXT: $journaltext"
     fi
     # kill daemon
-    PID=$(pgrep $__INTERNAL_DAEMON_JOURNALIST)
+    PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
     kill $PID
 }
 
@@ -460,7 +460,7 @@ rljCallDaemon() {
     fi
 
     # TODO SMAZAT test if PID persists
-    echo "DAEMON_PID: $DAEMON_PID REMOVE ME"
+    echo "DAEMON_PID: \"$DAEMON_PID\" REMOVE ME"
 
     # write to bash_pipe
     echo -n "$@" > $BEAKERLIB_BASH_PIPE
@@ -478,26 +478,28 @@ rljCallDaemon() {
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
         echo -n "message: ${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
-        echo  # TODO SMAZAT
+        #echo  # TODO SMAZAT
         #echo "code: ${BASH_REMATCH[2]}"  # TODO SMAZAT
         return "${BASH_REMATCH[2]}"
     else
         return 1
     fi
 
-    #return 0 # TODO if $response is supposed to be string or int decision
 }
 
-# TODO SMAZAT vv Prevents make install
-export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
-export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
-export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
-$__INTERNAL_DAEMON_JOURNALIST &
-rljCallDaemon metric --type "runtime" --name "mid" \
-        --value "vallua" --tolerance "tileraance" >&2
-kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
-exit 19
-# TODO SMAZAT ^^
+## TODO SMAZAT vv Prevents make install
+#export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
+#export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
+#export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
+#export BEAKERLIB="/usr/share/beakerlib"
+#$__INTERNAL_DAEMON_JOURNALIST &
+#rljCallDaemon init --test "basicshit" >&2
+#rljCallDaemon addphase --name "Setup" --type "WARN" >&2
+#rljCallDaemon rpm --package "bash" >&2
+#rljCallDaemon finphase
+#kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
+#exit 19
+## TODO SMAZAT ^^
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUTHORS
