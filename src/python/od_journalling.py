@@ -158,7 +158,6 @@ class Journal(object):
 
     # @staticmethod
     def __childNodeValue(node, id=0):
-        # TODO THIS MIGHT BE WRONG !! NEEDS FURTHER TESTING
         if etree.iselement(node):
             try:
                 return node.text
@@ -166,17 +165,6 @@ class Journal(object):
                 return ''
         else:
             return ''
-
-        # COMMENTED OUT
-        """Safe variant for node.childNodes[id].nodeValue()"""
-        # TODO WTF? is this test to check if method exists? shouldn't there be parentheses?
-        # if node.hasChildNodes:
-        # try:
-        #  return node.childNodes[id].nodeValue
-        # except IndexError:
-        # return ''
-        # else:
-        #  return ''
 
     __childNodeValue = staticmethod(__childNodeValue)
 
@@ -294,7 +282,6 @@ class Journal(object):
                 for nod in node.iterchildren():
                     if nod.tag == "message":
                         if nod.get("severity") in Journal.getAllowedSeverities(severity):
-                            # TODO Might be problematic len()
                             if (len(nod) > 0):
                                 text = Journal.__childNodeValue(nod, 0)
                             else:
@@ -313,7 +300,6 @@ class Journal(object):
                         phasesProcessed += 1
                         if Journal.printPhaseLog(nod, severity) > 0:
                             phasesFailed += 1
-        # TODO xpath problem?
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
         Journal.printHeadLog(testName)
         Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed))
@@ -559,7 +545,6 @@ class Journal(object):
 
     initializeJournal = staticmethod(initializeJournal)
 
-    # TODO THIS IS CALLED WAY TOO OFTEN
     # @staticmethod
     def saveJournal(jrnl):
         journal = os.environ['BEAKERLIB_JOURNAL']
@@ -569,9 +554,8 @@ class Journal(object):
             output.close()
             return 0
         except IOError, e:
-            # TODO REWORK all fails to write to stderr
+            # TODO Error handling
             Journal.printLog('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')
-            sys.stderr.write('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')  # TODO SMAZAT
             return 1
 
     saveJournal = staticmethod(saveJournal)
@@ -598,13 +582,12 @@ class Journal(object):
 
     openJournal = staticmethod(openJournal)
 
-    # TODO WHY? for always returns first one, and what if none there? and if always only 1 why then for loop?
     # @staticmethod
     def getLogEl(jrnl):
         node = jrnl.xpath('//log')
         if node:
             return node[0]
-        # TODO improve
+        # TODO improve Error Hanling
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
@@ -675,7 +658,6 @@ class Journal(object):
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         type = phase.get('type')
         name = phase.get('name')
-        # TODO xpath problem
         end = jrnl.xpath('endtime')
         timeNow = time.strftime(timeFormat)
         end[0].text = timeNow
@@ -752,7 +734,6 @@ class Journal(object):
         msg.text = msgText
 
         add_to.append(msg)
-        #return Journal.saveJournal(jrnl)   # TODO SMAZAT extra saveJournal?
         return 0
 
     addMessage = staticmethod(addMessage)
@@ -766,14 +747,7 @@ class Journal(object):
         log = Journal.getLogEl(jrnl)
         add_to = Journal.getLastUnfinishedPhase(log)
 
-        # TODO SMAZAT
-        # with open("/home/jheger/log.inc", "a") as fh:
-        #     fh.write(etree.tostring(log, pretty_print=True) + "\n\n")
-        # with open("/home/jheger/add.inc", "a") as fh:
-        #     fh.write(etree.tostring(add_to, pretty_print=True) + "\n\n")
-
         if add_to == log:  # no phase open
-            #sys.stderr.write("No phase OPEN!\n")   # TODO SMAZAT
             return 1
 
         message = unicode(message, 'utf-8', errors='replace')
@@ -787,7 +761,6 @@ class Journal(object):
         msg.text = result
         add_to.append(msg)
 
-        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
         return 0
 
     addTest = staticmethod(addTest)
@@ -806,7 +779,6 @@ class Journal(object):
             pkgEl, pkgCon = pkg
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
-        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
         return 0
 
     logRpmVersion = staticmethod(logRpmVersion)
@@ -832,7 +804,6 @@ class Journal(object):
         metric.text = str(value)
         add_to.append(metric)
 
-        #return Journal.saveJournal(jrnl)  # TODO SMAZAT extra saveJournal?
         return 0
 
     addMetric = staticmethod(addMetric)
@@ -864,7 +835,6 @@ def need(args):
         return 1
 
 
-# TODO COMMENT
 # Failed to add a test: there is no phase open
 # So we open it, add a test, add a FAIL to let the user know
 # he has a broken test, and close the phase again
