@@ -113,7 +113,7 @@ rlJournalStart(){
 
 
     # finally initialize the journal
-    if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
+    if rljCallDaemon init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
         echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
@@ -263,7 +263,7 @@ Example:
 
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    $__INTERNAL_JOURNALIST dump --type "$TYPE"
+    rljCallDaemon dump --type "$TYPE"
 }
 
 # backward compatibility
@@ -340,7 +340,7 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    $__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
+    rljCallDaemon printlog --severity $SEVERITY $FULL_JOURNAL
 }
 
 # backward compatibility
@@ -363,7 +363,7 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
-    $__INTERNAL_JOURNALIST teststate >&2
+    rljCallDaemon teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -383,7 +383,7 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
-    $__INTERNAL_JOURNALIST phasestate >&2
+    rljCallDaemon phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -396,12 +396,12 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    $__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
+    rljCallDaemon addphase --name "$MSG" --type "$1" >&2
 }
 
 rljClosePhase(){
     local out
-    out=$($__INTERNAL_JOURNALIST finphase)
+    out=$(rljCallDaemon finphase)
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
     local result="$(echo "$out" | cut -d ':' -f 2)"
@@ -412,15 +412,15 @@ rljClosePhase(){
 }
 
 rljAddTest(){
-    if ! eval "$__INTERNAL_JOURNALIST test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
+    if ! eval "rljCallDaemon test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
     then
       # Failed to add a test: there is no phase open
       # So we open it, add a test, add a FAIL to let the user know
       # he has a broken test, and close the phase again
 
       rljAddPhase "FAIL" "Asserts collected outside of a phase"
-      $__INTERNAL_JOURNALIST test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
-      $__INTERNAL_JOURNALIST test --message "$1" --result "$2" >&2
+      rljCallDaemon test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
+      rljCallDaemon test --message "$1" --result "$2" >&2
       rljClosePhase
     fi
 }
@@ -435,17 +435,17 @@ rljAddMetric(){
         return 1
     fi
     rlLogDebug "rljAddMetric: Storing metric $MID with value $VALUE and tolerance $TOLERANCE"
-    $__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
+    rljCallDaemon metric --type "$1" --name "$MID" \
         --value "$VALUE" --tolerance "$TOLERANCE" >&2
     return $?
 }
 
 rljAddMessage(){
-    $__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
+    rljCallDaemon log --message "$1" --severity "$2" >&2
 }
 
 rljRpmLog(){
-    $__INTERNAL_JOURNALIST rpm --package "$1" >&2
+    rljCallDaemon rpm --package "$1" >&2
 }
 
 # TODO reading with cat? something better?
@@ -459,11 +459,20 @@ rljCallDaemon() {
         exit 1
     fi
 
-    # TODO SMAZAT test if PID persists
+    # TODO create another func, which will echo escaped args in loop and this func wil capture it $()
+    # also in sighandler send final ERR to pipe not to block it
+
+
+    # TODO SMAZAT test if PID persists, possibly does, if so replace pgrep
     echo "DAEMON_PID: \"$DAEMON_PID\" REMOVE ME"
 
+    # escape arguments
+    args=$(escapeArguments "$@")
+
+    echo "$args"  # TODO SMAZAT
+
     # write to bash_pipe
-    echo -n "$@" > $BEAKERLIB_BASH_PIPE
+    echo -n "$args" > $BEAKERLIB_BASH_PIPE
     if [[ $? -ne 0 ]]; then
         return 1
     fi
@@ -477,7 +486,7 @@ rljCallDaemon() {
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
-        echo -n "message: ${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
+        echo -n "${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
         #echo  # TODO SMAZAT
         #echo "code: ${BASH_REMATCH[2]}"  # TODO SMAZAT
         return "${BASH_REMATCH[2]}"
@@ -487,6 +496,13 @@ rljCallDaemon() {
 
 }
 
+# TODO description
+escapeArguments() {
+    for arg in "$@"; do
+        printf %q "$arg"
+        echo -n " "
+    done
+}
 ## TODO SMAZAT vv Prevents make install
 #export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
 #export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
