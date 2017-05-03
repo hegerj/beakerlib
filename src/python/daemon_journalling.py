@@ -73,21 +73,21 @@ class Journal(object):
             else:
                 print message
         else:
-            return message  # TODO CHANGE maybe add \n ??
+            return message + "\n"  # TODO CHANGE maybe add \n ??
     _print = staticmethod(_print)
 
     # @staticmethod
     def printPurpose(message, toVar=None):
-        message = ""
-        message += Journal.printHeadLog("Test description", toVar=toVar)
-        message += Journal._print(Journal.wrap(message, 80), toVar=toVar)
-        return message
+        returnMessage = ""
+        returnMessage += Journal.printHeadLog("Test description", toVar=toVar)
+        returnMessage += Journal._print(Journal.wrap(message, 80), toVar=toVar)
+        return returnMessage
 
     printPurpose = staticmethod(printPurpose)
 
     # @staticmethod
     def printLog(message, prefix="LOG", toVar=None):
-        message = ""
+        returnMessage = ""
         color = uncolor = ""
         if sys.stdout.isatty() and prefix in ("PASS", "FAIL", "INFO", "WARNING"):
             color = termColors[prefix]
@@ -96,23 +96,23 @@ class Journal(object):
             if toVar is None:
                 Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line))
             else:
-                message += Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line), toVar=True)
-        return message
+                returnMessage += Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line), toVar=True)
+        return returnMessage
 
     printLog = staticmethod(printLog)
 
     # @staticmethod
     def printHeadLog(message, toVar=None):
-        message = ""
+        returnMessage = ""
         if toVar is None:
             print "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
             Journal.printLog(message)
             print "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
         else:
-            message += "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"  # TODO maybe add \n
-            message += Journal.printLog(message, toVar=True)
-            message += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"  # TODO maybe add \n
-            return message
+            returnMessage += "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"  # TODO maybe add \n
+            returnMessage += Journal.printLog(message, toVar=True)
+            returnMessage += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"  # TODO maybe add \n
+            return returnMessage
 
     printHeadLog = staticmethod(printHeadLog)
 
@@ -128,6 +128,7 @@ class Journal(object):
 
     # @staticmethod
     def printPhaseLog(phase, severity):
+        returnMessage = ""
         phaseName = phase.get("name")
         phaseResult = phase.get("result")
         starttime = phase.get("starttime")
@@ -142,21 +143,21 @@ class Journal(object):
             #   - timezones / time messed with in the test
             #   - python cannot handle the format (probably a python bug)
             duration = None
-        Journal.printHeadLog(phaseName)
+            returnMessage += Journal.printHeadLog(phaseName, toVar=True)
         passed = 0
         failed = 0
         for node in phase.iterchildren():
             if node.tag == "message":
                 if node.get("severity") in Journal.getAllowedSeverities(severity):
                     text = Journal.__childNodeValue(node, 0)
-                    Journal.printLog(text, node.get("severity"))
+                    returnMessage += Journal.printLog(text, node.get("severity"), toVar=True)
             elif node.tag == "test":
                 result = Journal.__childNodeValue(node, 0)
                 if result == "FAIL":
-                    Journal.printLog("%s" % node.get("message"), "FAIL")
+                    returnMessage += Journal.printLog("%s" % node.get("message"), "FAIL", toVar=True)
                     failed += 1
                 else:
-                    Journal.printLog("%s" % node.get("message"), "PASS")
+                    returnMessage += Journal.printLog("%s" % node.get("message"), "PASS", toVar=True)
                     passed += 1
         if duration is not None:
             formatedDuration = ''
@@ -169,10 +170,10 @@ class Journal(object):
             formatedDuration += "%is" % duration
         else:
             formatedDuration = "duration unknown (error when computing)"
-        Journal.printLog("Duration: %s" % formatedDuration)
-        Journal.printLog("Assertions: %s good, %s bad" % (passed, failed))
-        Journal.printLog("RESULT: %s" % phaseName, phaseResult)
-        return failed
+        returnMessage += Journal.printLog("Duration: %s" % formatedDuration, toVar=True)
+        returnMessage += Journal.printLog("Assertions: %s good, %s bad" % (passed, failed), toVar=True)
+        returnMessage += Journal.printLog("RESULT: %s" % phaseName, phaseResult, toVar=True)
+        return returnMessage, failed
 
     printPhaseLog = staticmethod(printPhaseLog)
 
@@ -268,11 +269,10 @@ class Journal(object):
         global jrnl
         if jrnl is None:
             jrnl = Journal.openJournal()
-        Journal.printHeadLog("TEST PROTOCOL")
+        message = ""
+        message += Journal.printHeadLog("TEST PROTOCOL", toVar=True)
         phasesFailed = 0
         phasesProcessed = 0
-
-        message = ""
 
         for node in jrnl.iter():
             if node.tag == "test_id":
@@ -332,11 +332,13 @@ class Journal(object):
                         message += Journal.printLog("%s: %s" % (nod.get("name"), Journal.__childNodeValue(nod, 0)), "METRIC", toVar=True)
                     elif nod.tag == "phase":
                         phasesProcessed += 1
-                        if Journal.printPhaseLog(nod, severity) > 0:
+                        returnPhaseLog, returnPhaseFailed = Journal.printPhaseLog(nod, severity)
+                        if returnPhaseFailed > 0:
                             phasesFailed += 1
+                        message += returnPhaseLog
         # TODO xpath problem?
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
-        message += Journal.printHeadLog(testName)
+        message += Journal.printHeadLog(testName, toVar=True)
         message += Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed), toVar=True)
         message += Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"), toVar=True)
 
