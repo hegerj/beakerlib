@@ -911,9 +911,7 @@ def updateXML(optparser, jrnl=None):
 
     # If no new commands were added to file
     # there is no need to read it
-    # TODO it is called fairly often, limit it somehow maybe?
     if len(lines) == skipped_lines:
-        #sys.stderr.write("No change since last read meta 900\n")  # TODO SMAZAT
         fh.close()
         return 0
 
@@ -922,94 +920,48 @@ def updateXML(optparser, jrnl=None):
         line_count += 1
         (options, args) = optparser.parse_args(shlex.split(line))
 
-        # TODO SMAZAT
-        # sys.stderr.write("args: {0}\n".format(args))  # TODO SMAZAT
-        # for key, value in vars(options).iteritems():  # TODO SMAZAT
-        #     printed = False
-        #     if value:
-        #         sys.stderr.write(str(key)+ ": "+ str(value) + " | ")
-        #         #printed = True
-        #     #if printed:
-        #      #   sys.stderr.write("\n")
-        # sys.stderr.write("\n")
-
-        # TODO How to replace ret_need?
         command = args[0]
         if command == "dump":
             ret_need = need((options.type,))
             if ret_need > 0:
-                sys.stderr.write("SKIPPED 916\n")  # TODO SMAZAT
                 continue
-                #return ret_need
-            #print "dump"  # TODO SMAZAT
             Journal.dumpJournal(options.type, jrnl=jrnl)
-            continue
-        # elif command == "addphase":
-        #     ret_need = need((options.name, options.type))
-        #     #sys.stderr.write("ADDPHASE name: " + str(options.name) + '\n' )  # TODO SMAZAT
-        #     if ret_need > 0:
-        #         #return ret_need
-        #         sys.stderr.write("SKIPPED 926\n")  # TODO SMAZAT
-        #         continue
-        #     ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
-        #     if ret_need > 0:
-        #         #return ret_need
-        #         sys.stderr.write("SKIPPED 931\n")  # TODO SMAZAT
-        #         continue
-        #     Journal.printHeadLog(options.name)   # TODO Does this work as expected? probably gets caught by finphsae
-        #     #print "addphase"   # TODO SMAZAT
             continue
         elif command == "log":
             ret_need = need((options.message,))
             if ret_need > 0:
-                sys.stderr.write("SKIPPED 939\n")  # TODO SMAZAT
                 continue
-                #return ret_need
             severity = options.severity
             if severity is None:
                 severity = "LOG"
-            #print "log"   # TODO SMAZAT
             Journal.addMessage(options.message, severity,jrnl=jrnl)
             continue
-        # TODO Possible regressions, needs logic check
         elif command == "test":
-            #""" # TODO SMAZAT
             ret_need = need((options.message,))
             if ret_need > 0:
                 testOutOfPhase(options.message, "FAIL", jrnl=jrnl)
-                sys.stderr.write("testoutofphase 954\n")  # TODO SMAZAT
                 continue
             result = options.result
             if result is None:
                 result = "FAIL"
             if Journal.addTest(options.message, result, options.command,jrnl=jrnl):
                 testOutOfPhase(options.message, result, jrnl=jrnl)
-                sys.stderr.write("SKIPPED 961\n")  # TODO SMAZAT
                 continue
             Journal.printLog(options.message, result)
-            #"""
-            #print "test"  # TODO SMAZAT
             continue
         elif command == "metric":
             ret_need = need((options.name, options.type, options.value, options.tolerance))
             if ret_need > 0:
-                sys.stderr.write("SKIPPED 970\n")  # TODO SMAZAT
                 continue
-                #return ret_need
             try:
                 Journal.addMetric(options.type, options.name, float(options.value), float(options.tolerance),jrnl=jrnl)
             except:
-                sys.stderr.write("SKIPPED 976\n")  # TODO SMAZAT
                 continue
-            #print "metric"  # TODO SMAZAT
         elif command == "rpm":
             ret_need = need((options.package,))
             if ret_need > 0:
-                #return ret_need
-                sys.stderr.write("SKIPPED 983\n")   # TODO SMAZAT
                 continue
             Journal.logRpmVersion(options.package, jrnl=jrnl)
-            #print "rpm"  # TODO SMAZAT
             continue
 
     # Write last read line to the meta file
@@ -1017,16 +969,7 @@ def updateXML(optparser, jrnl=None):
     fh.close()
 
 
-    # TODO SMAZAT
-    # sys.stderr.write("End of updateXML()\n")
-    # # TODO SMAZAT
-    # sys.stderr.write("updateXML() object: " + str(jrnl)+'\n')
-    # with open("/home/jheger/jrnl.prog", 'w') as fh:
-    #     fh.write(etree.tostring(jrnl, pretty_print=True))
-    #     fh.write("\n")
-
     Journal.saveJournal(jrnl)
-    # sys.stderr.write("EXIT CODE from save: " + str(exitcod) + '\n')  # TODO SMAZAT
     return 0
 
 
@@ -1073,7 +1016,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     else:
         command = None
 
-    # TODO update comment
     # These have different behaviour than other commands
     # these commands are processed immediately and their results a returned
     # to journal.sh
@@ -1082,7 +1024,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         if ret_need > 0:
             return ret_need
         package = Journal.determinePackage(options.test)
-        #print "init from ARGS"  # TODO SMAZAT
         return Journal.initializeJournal(options.test, package)
     else:
         jrnl = Journal.openJournal()
@@ -1091,22 +1032,19 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         updateXML(optparser, jrnl)
         result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
         Journal._print("%s:%s:%s" % (type_r, result, name))
-        #sys.stderr.write("FINPHASE " + str(name)+ '\n')  # TODO SMAZAT
         try:
            return int(score)
         except:
            return 1
-        #print "finphase from ARGS"
     elif command == "addphase":
-        #sys.stderr.write("ADDPHASE name, type: " + str(options.name) + "; " + str(options.type) + '\n')  # TODO SMAZAT
-        updateXML(optparser, jrnl)  # TODO Does it make sense?
+        updateXML(optparser, jrnl)
         ret_need = need((options.name, options.type))
         if ret_need > 0:
-            sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+            sys.stderr.write("ADDPHASE SKIPPED 1088")
             return ret_need
         ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
         if ret_need > 0:
-            sys.stderr.write("ADDPHASE SKIPPED 1088")  # TODO SMAZAT
+            sys.stderr.write("ADDPHASE SKIPPED 1088")
             return ret_need
         Journal.printHeadLog(options.name)
     elif command == "printlog":
@@ -1115,8 +1053,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             return ret_need
         Journal.createLog(options.severity, options.full_journal, jrnl=jrnl)
         updateXML(optparser, jrnl)
-        #print "printlog from ARGS"  # TODO SMAZAT
-        return 0  # TODO SMAZAT ?? possibly not
+        return 0
     elif command == "teststate":
         failed = Journal.testState(jrnl=jrnl)
         updateXML(optparser, jrnl)
