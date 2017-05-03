@@ -875,7 +875,6 @@ signal.signal(signal.SIGABRT, signalHandler)
 signal.signal(signal.SIGFPE, signalHandler)
 signal.signal(signal.SIGSEGV, signalHandler)
 signal.signal(signal.SIGALRM, signalHandler)
-signal.signal(signal.SIGCHLD, signalHandler)
 
 
 # TODO COMMENT
