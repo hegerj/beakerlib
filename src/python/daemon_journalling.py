@@ -851,13 +851,13 @@ def signalHandler(signal, frame):
     # using global variable
     global jrnl
     if jrnl is None:
-        print "daemon_journalling.py: Failed to save journal %s  exiting...1" % journal  # TODO Error handling SMAZAT 1 a 2 AT THE END OF STRING!!!!!
+        print "daemon_journalling.py: Failed to save journal %s exiting..." % journal  # TODO Error handling SMAZAT 1 a 2 AT THE END OF STRING!!!!!
         exit(1)
     else:
         if Journal.saveJournal(jrnl):
-            print "daemon_journalling.py: Failed to save journal %s  exiting...2" % journal  # TODO Error handling
+            print "daemon_journalling.py: Failed to save journal %s exiting..." % journal  # TODO Error handling
             exit(1)
-        print "daemon_journalling.py: Saved journal to %s. Exiting..." % journal
+        print "daemon_journalling.py: Saved journal to %s. Exiting successfully..." % journal
         exit(0)
 
 
@@ -877,12 +877,15 @@ def inputParse(pipe_read, optparser):
 
     if args:
         command = args[0]
-        print "COMMAND: %s" % command
+        #print "COMMAND: %s" % command  # TODO SMAZAT
     else:
         # something is wrong do nothing and return 1
         command = ""
         ret_code = 1
 
+    # TODO SMAZAT
+    #print args
+    #print options
 
     if command == "init":
         # change global jrnl var
@@ -1008,11 +1011,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
     # Main loop
     while True:
-
-        global jrnl  # TODO SMAZAT
-        with open("/home/jheger/obj", 'a') as fh:
-            fh.write("{0}\n".format(jrnl))   # TODO SMAZAT !
-
         try:
             os.stat(bash_pipe)
         except:  # TODO better Error handling
@@ -1028,7 +1026,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        print "python print:  {0}".format(pipe_read)  # TODO SMAZAT
+        #print "python received:  {0}".format(pipe_read)  # TODO SMAZAT
 
         pipe_write = inputParse(pipe_read, optparser)
         #pipe_write = "ress"   # TODO SMAZAT
@@ -1042,6 +1040,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         pp = open(python_pipe, 'w')
         pp.write("%s\n" % pipe_write)
         pp.close()
+
+        # TODO ? in sighandler send final ERR to pipe not to block it
 
 
 if __name__ == "__main__":

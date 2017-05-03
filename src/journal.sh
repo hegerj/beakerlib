@@ -459,17 +459,14 @@ rljCallDaemon() {
         exit 1
     fi
 
-    # TODO create another func, which will echo escaped args in loop and this func wil capture it $()
-    # also in sighandler send final ERR to pipe not to block it
 
-
-    # TODO SMAZAT test if PID persists, possibly does, if so replace pgrep
-    echo "DAEMON_PID: \"$DAEMON_PID\" REMOVE ME"
+    # TODO test if PID persists, possibly does, if so replace pgrep
+    #echo "DAEMON_PID: \"$DAEMON_PID\" REMOVE ME"
 
     # escape arguments
     args=$(escapeArguments "$@")
 
-    echo "$args"  # TODO SMAZAT
+    #echo "$args"  # TODO SMAZAT
 
     # write to bash_pipe
     echo -n "$args" > $BEAKERLIB_BASH_PIPE
@@ -482,7 +479,7 @@ rljCallDaemon() {
         return 1
     fi
 
-    echo $response # TODO SMAZAT
+    #echo $response # TODO SMAZAT
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
