@@ -1000,30 +1000,31 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     # TODO better Error handling
     if not 'BEAKERLIB_JOURNAL' in os.environ:
         print "BEAKERLIB_JOURNAL not defined in the environment"
-        return 1
+        exit(1)
 
-    if not 'BEAKERLIB_BASH_PIPE' in os.environ:
+    if not 'BEAKERLIB_PIPE' in os.environ:
         print "BEAKERLIB_BASH_PIPE not defined in the environment"
-        return 1
+        exit(1)
 
-    if not 'BEAKERLIB_PYTHON_PIPE' in os.environ:
-        print "BEAKERLIB_PYTHON_PIPE not defined in the environment"
-        return 1
+    # TODO SMAZAT
+    #if not 'BEAKERLIB_PYTHON_PIPE' in os.environ:
+     #   print "BEAKERLIB_PYTHON_PIPE not defined in the environment"
+      #  return 1
 
-    bash_pipe = os.environ['BEAKERLIB_BASH_PIPE']
-    python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE']
+    pipe = os.environ['BEAKERLIB_PIPE']
+    #python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE'] # TODO SMAZAT
 
     # Main loop
     while True:
         try:
-            os.stat(bash_pipe)
+            os.stat(pipe)
         except:  # TODO better Error handling
-            print "%s does not exist" % str(bash_pipe)
+            print "%s does not exist" % str(pipe)
             return 1
 
         pipe_read = ""
         # reading from pipe as log as something is there
-        with open(bash_pipe) as bp:
+        with open(pipe) as bp:
             while True:
                 data = bp.read()
                 if len(data) == 0:
@@ -1036,12 +1037,12 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         #pipe_write = "ress"   # TODO SMAZAT
 
         try:
-            os.stat(python_pipe)
+            os.stat(pipe)
         except:  # TODO better Error handling
-            print "%s does not exist" % str(python_pipe)
+            print "%s does not exist" % str(pipe)
             return 1
 
-        pp = open(python_pipe, 'w')
+        pp = open(pipe, 'w')
         pp.write("%s\n" % pipe_write)
         pp.close()
 

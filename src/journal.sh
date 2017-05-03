@@ -86,8 +86,8 @@ rlJournalStart(){
 
     # set global BeakerLib variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
-    export BEAKERLIB_BASH_PIPE="$BEAKERLIB_DIR/bash_pipe"
-    export BEAKERLIB_PYTHON_PIPE="$BEAKERLIB_DIR/python_pipe"
+    export BEAKERLIB_PIPE="$BEAKERLIB_DIR/bash_pipe"
+    #export BEAKERLIB_PYTHON_PIPE="$BEAKERLIB_DIR/python_pipe"  # TODO SMAZAT
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
@@ -97,8 +97,8 @@ rlJournalStart(){
     fi
 
     # create named pipes
-    mkfifo $BEAKERLIB_BASH_PIPE 2>/dev/null
-    mkfifo $BEAKERLIB_PYTHON_PIPE 2>/dev/null
+    mkfifo $BEAKERLIB_PIPE 2>/dev/null
+    #mkfifo $BEAKERLIB_PYTHON_PIPE 2>/dev/null  # TODO SMAZAT
 
     # start daemon journalist and store its PID  # TODO need to export?
     $__INTERNAL_DAEMON_JOURNALIST &
@@ -468,13 +468,13 @@ rljCallDaemon() {
 
     #echo "$args"  # TODO SMAZAT
 
-    # write to bash_pipe
-    echo -n "$args" > $BEAKERLIB_BASH_PIPE
+    # write to pipe
+    echo -n "$args" > $BEAKERLIB_PIPE
     if [[ $? -ne 0 ]]; then
         return 1
     fi
-    # read from python_pipe
-    response=$(cat $BEAKERLIB_PYTHON_PIPE)
+    # read from pipe
+    response=$(cat $BEAKERLIB_PIPE)
     if [[ $? -ne 0 ]]; then
         return 1
     fi
