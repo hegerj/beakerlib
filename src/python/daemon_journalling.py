@@ -651,6 +651,7 @@ class Journal(object):
 
         log.append(phase)
 
+        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addPhase = staticmethod(addPhase)
@@ -749,6 +750,7 @@ class Journal(object):
         msg.text = msgText
 
         add_to.append(msg)
+        #return 0  # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addMessage = staticmethod(addMessage)
@@ -774,7 +776,7 @@ class Journal(object):
 
         msg.text = result
         add_to.append(msg)
-
+        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addTest = staticmethod(addTest)
@@ -792,6 +794,7 @@ class Journal(object):
             pkgEl, pkgCon = pkg
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
+        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     logRpmVersion = staticmethod(logRpmVersion)
@@ -816,6 +819,7 @@ class Journal(object):
         metric.text = str(value)
         add_to.append(metric)
 
+        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addMetric = staticmethod(addMetric)
