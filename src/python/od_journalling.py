@@ -1063,11 +1063,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         updateXML(optparser, jrnl)
         return failed
 
-
-    # TODO think about it, why calling with optparser or better yet dont you double parse? probably not
-    # If called without argument update XML journal
-    updateXML(optparser, jrnl)
-
     return 0
 
 
