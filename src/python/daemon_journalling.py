@@ -64,7 +64,7 @@ class Journal(object):
     wrap = staticmethod(wrap)
 
     # for output redirected to file, we must not rely on python's
-    # automagic encoding detection - enforcing utf8 on unicode
+    # automatic encoding detection - enforcing utf8 on unicode
     # @staticmethod
     def _print(message):
         if isinstance(message, types.UnicodeType):

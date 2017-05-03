@@ -466,8 +466,6 @@ rljCallDaemon() {
     # escape arguments
     args=$(escapeArguments "$@")
 
-    #echo "$args"  # TODO SMAZAT
-
     # write to pipe
     echo -n "$args" > $BEAKERLIB_PIPE
     if [[ $? -ne 0 ]]; then
@@ -478,8 +476,6 @@ rljCallDaemon() {
     if [[ $? -ne 0 ]]; then
         return 1
     fi
-
-    #echo $response # TODO SMAZAT
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
