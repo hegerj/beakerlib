@@ -849,6 +849,7 @@ def need(args):
 
 
 # TODO describe
+# TODO ? in sighandler send final ERR to pipe not to block it
 def signalHandler(signal, frame):
     journal = os.environ['BEAKERLIB_JOURNAL']
     print "daemon_journalling.py: Received signal %s" % signal
@@ -865,9 +866,16 @@ def signalHandler(signal, frame):
         exit(0)
 
 
-# TODO add more signals?
+# TODO why those signals?
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
+signal.signal(signal.SIGHUP, signalHandler)
+signal.signal(signal.SIGILL, signalHandler)
+signal.signal(signal.SIGABRT, signalHandler)
+signal.signal(signal.SIGFPE, signalHandler)
+signal.signal(signal.SIGSEGV, signalHandler)
+signal.signal(signal.SIGALRM, signalHandler)
+signal.signal(signal.SIGCHLD, signalHandler)
 
 
 # TODO COMMENT
@@ -1006,13 +1014,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_BASH_PIPE not defined in the environment"
         exit(1)
 
-    # TODO SMAZAT
-    #if not 'BEAKERLIB_PYTHON_PIPE' in os.environ:
-     #   print "BEAKERLIB_PYTHON_PIPE not defined in the environment"
-      #  return 1
-
     pipe = os.environ['BEAKERLIB_PIPE']
-    #python_pipe = os.environ['BEAKERLIB_PYTHON_PIPE'] # TODO SMAZAT
 
     # Main loop
     while True:
@@ -1031,10 +1033,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        #print "python received:  {0}".format(pipe_read)  # TODO SMAZAT
-
         pipe_write = inputParse(pipe_read, optparser)
-        #pipe_write = "ress"   # TODO SMAZAT
 
         try:
             os.stat(pipe)
@@ -1045,8 +1044,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         pp = open(pipe, 'w')
         pp.write("%s\n" % pipe_write)
         pp.close()
-
-        # TODO ? in sighandler send final ERR to pipe not to block it
 
 
 if __name__ == "__main__":
