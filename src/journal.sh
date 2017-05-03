@@ -202,8 +202,8 @@ rlJournalEnd(){
         rlLog "JOURNAL TXT: $journaltext"
     fi
     # kill daemon
-    PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
-    kill $PID
+    #PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
+    kill $DAEMON_PID
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -453,7 +453,7 @@ rljRpmLog(){
 # communicate with python daemon
 rljCallDaemon() {
     # check if daemon is still running
-    if ! pgrep -f $__INTERNAL_DAEMON_JOURNALIST > /dev/null; then
+    if ! kill -0 $DAEMON_PID 2>/dev/null; then
         echo "rljCallDaemon: Failed to find running Journalling daemon."
         echo "rljCallDaemon: Cannot continue, exiting..."
         exit 1
