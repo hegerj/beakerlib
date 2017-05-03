@@ -73,7 +73,7 @@ class Journal(object):
             else:
                 print message
         else:
-            return message + "\n"  # TODO CHANGE maybe add \n ??
+            return message + "\n"
     _print = staticmethod(_print)
 
     # @staticmethod
@@ -109,9 +109,9 @@ class Journal(object):
             Journal.printLog(message)
             print "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
         else:
-            returnMessage += "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"  # TODO maybe add \n
+            returnMessage += "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
             returnMessage += Journal.printLog(message, toVar=True)
-            returnMessage += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"  # TODO maybe add \n
+            returnMessage += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
             return returnMessage
 
     printHeadLog = staticmethod(printHeadLog)
@@ -179,7 +179,6 @@ class Journal(object):
 
     # @staticmethod
     def __childNodeValue(node, id=0):
-        # TODO THIS MIGHT BE WRONG !! NEEDS FURTHER TESTING
         if etree.iselement(node):
             try:
                 return node.text
@@ -187,17 +186,6 @@ class Journal(object):
                 return ''
         else:
             return ''
-
-        # COMMENTED OUT
-        """Safe variant for node.childNodes[id].nodeValue()"""
-        # TODO WTF? is this test to check if method exists? shouldn't there be parentheses? SMAZAT
-        # if node.hasChildNodes:
-        # try:
-        #  return node.childNodes[id].nodeValue
-        # except IndexError:
-        # return ''
-        # else:
-        #  return ''
 
     __childNodeValue = staticmethod(__childNodeValue)
 
@@ -328,7 +316,8 @@ class Journal(object):
                         else:
                             message += Journal.printLog("%s" % nod.get("message"), "PASS", toVar=True)
                     elif nod.tag == "metric":
-                        message += Journal.printLog("%s: %s" % (nod.get("name"), Journal.__childNodeValue(nod, 0)), "METRIC", toVar=True)
+                        message += Journal.printLog("%s: %s" % (nod.get("name"), Journal.__childNodeValue(nod, 0)),
+                                                    "METRIC", toVar=True)
                     elif nod.tag == "phase":
                         phasesProcessed += 1
                         returnPhaseLog, returnPhaseFailed = Journal.printPhaseLog(nod, severity)
@@ -337,7 +326,8 @@ class Journal(object):
                         message += returnPhaseLog
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
         message += Journal.printHeadLog(testName, toVar=True)
-        message += Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed), toVar=True)
+        message += Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed),
+                                    toVar=True)
         message += Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"), toVar=True)
 
         return message
