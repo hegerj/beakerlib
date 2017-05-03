@@ -66,37 +66,53 @@ class Journal(object):
     # for output redirected to file, we must not rely on python's
     # automatic encoding detection - enforcing utf8 on unicode
     # @staticmethod
-    def _print(message):
-        if isinstance(message, types.UnicodeType):
-            print message.encode('utf-8', 'replace')
+    def _print(message, toVar=None):
+        if toVar is None:
+            if isinstance(message, types.UnicodeType):
+                print message.encode('utf-8', 'replace')
+            else:
+                print message
         else:
-            print message
-
+            return message  # TODO CHANGE maybe add \n ??
     _print = staticmethod(_print)
 
     # @staticmethod
-    def printPurpose(message):
-        Journal.printHeadLog("Test description")
-        Journal._print(Journal.wrap(message, 80))
+    def printPurpose(message, toVar=None):
+        message = ""
+        message += Journal.printHeadLog("Test description", toVar=toVar)
+        message += Journal._print(Journal.wrap(message, 80), toVar=toVar)
+        return message
 
     printPurpose = staticmethod(printPurpose)
 
     # @staticmethod
-    def printLog(message, prefix="LOG"):
+    def printLog(message, prefix="LOG", toVar=None):
+        message = ""
         color = uncolor = ""
         if sys.stdout.isatty() and prefix in ("PASS", "FAIL", "INFO", "WARNING"):
             color = termColors[prefix]
             uncolor = "\033[0m"
         for line in message.split("\n"):
-            Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line))
+            if toVar is None:
+                Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line))
+            else:
+                message += Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line), toVar=True)
+        return message
 
     printLog = staticmethod(printLog)
 
     # @staticmethod
-    def printHeadLog(message):
-        print "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-        Journal.printLog(message)
-        print "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
+    def printHeadLog(message, toVar=None):
+        message = ""
+        if toVar is None:
+            print "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
+            Journal.printLog(message)
+            print "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
+        else:
+            message += "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"  # TODO maybe add \n
+            message += Journal.printLog(message, toVar=True)
+            message += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"  # TODO maybe add \n
+            return message
 
     printHeadLog = staticmethod(printHeadLog)
 
@@ -256,43 +272,45 @@ class Journal(object):
         phasesFailed = 0
         phasesProcessed = 0
 
+        message = ""
+
         for node in jrnl.iter():
             if node.tag == "test_id":
-                Journal.printLog("Test run ID   : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test run ID   : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "package":
-                Journal.printLog("Package       : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Package       : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "testname":
-                Journal.printLog("Test name     : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test name     : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "pkgdetails":
-                Journal.printLog("Installed     : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Installed     : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "release":
-                Journal.printLog("Distro        : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Distro        : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "starttime":
-                Journal.printLog("Test started  : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test started  : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "endtime":
-                Journal.printLog("Test finished : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test finished : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "arch":
-                Journal.printLog("Architecture  : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Architecture  : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "hw_cpu" and full_journal:
-                Journal.printLog("CPUs          : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("CPUs          : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "hw_ram" and full_journal:
-                Journal.printLog("RAM size      : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("RAM size      : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "hw_hdd" and full_journal:
-                Journal.printLog("HDD size      : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("HDD size      : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "beakerlib_rpm":
-                Journal.printLog("beakerlib RPM : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("beakerlib RPM : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "beakerlib_redhat_rpm":
-                Journal.printLog("bl-redhat RPM : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("bl-redhat RPM : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "testversion":
-                Journal.printLog("Test version  : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test version  : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "testbuilt":
-                Journal.printLog("Test built    : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Test built    : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "hostname":
-                Journal.printLog("Hostname      : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Hostname      : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "plugin":
-                Journal.printLog("Plugin        : %s" % Journal.__childNodeValue(node, 0))
+                message += Journal.printLog("Plugin        : %s" % Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "purpose":
-                Journal.printPurpose(Journal.__childNodeValue(node, 0))
+                message += Journal.printPurpose(Journal.__childNodeValue(node, 0), toVar=True)
             elif node.tag == "log":
                 for nod in node.iterchildren():
                     if nod.tag == "message":
@@ -302,25 +320,27 @@ class Journal(object):
                                 text = Journal.__childNodeValue(nod, 0)
                             else:
                                 text = ""
-                            Journal.printLog(text, nod.get("severity"))
+                            message += Journal.printLog(text, nod.get("severity"), toVar=True)
                     elif nod.tag == "test":
-                        Journal.printLog("BEAKERLIB BUG: Assertion not in phase", "WARNING")
+                        message += Journal.printLog("BEAKERLIB BUG: Assertion not in phase", "WARNING", toVar=True)
                         result = Journal.__childNodeValue(nod, 0)
                         if result == "FAIL":
-                            Journal.printLog("%s" % nod.get("message"), "FAIL")
+                            message += Journal.printLog("%s" % nod.get("message"), "FAIL", toVar=True)
                         else:
-                            Journal.printLog("%s" % nod.get("message"), "PASS")
+                            message += Journal.printLog("%s" % nod.get("message"), "PASS", toVar=True)
                     elif nod.tag == "metric":
-                        Journal.printLog("%s: %s" % (nod.get("name"), Journal.__childNodeValue(nod, 0)), "METRIC")
+                        message += Journal.printLog("%s: %s" % (nod.get("name"), Journal.__childNodeValue(nod, 0)), "METRIC", toVar=True)
                     elif nod.tag == "phase":
                         phasesProcessed += 1
                         if Journal.printPhaseLog(nod, severity) > 0:
                             phasesFailed += 1
         # TODO xpath problem?
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
-        Journal.printHeadLog(testName)
-        Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed))
-        Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"))
+        message += Journal.printHeadLog(testName)
+        message += Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed), toVar=True)
+        message += Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"), toVar=True)
+
+        return message
 
     createLog = staticmethod(createLog)
 
@@ -870,11 +890,14 @@ def signalHandler(signal, frame):
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
 signal.signal(signal.SIGHUP, signalHandler)
+signal.signal(signal.SIGQUIT, signalHandler)
 signal.signal(signal.SIGILL, signalHandler)
 signal.signal(signal.SIGABRT, signalHandler)
 signal.signal(signal.SIGFPE, signalHandler)
 signal.signal(signal.SIGSEGV, signalHandler)
 signal.signal(signal.SIGALRM, signalHandler)
+signal.signal(signal.SIGBUS, signalHandler)
+signal.signal(signal.SIGPIPE, signalHandler)
 
 
 # TODO COMMENT
@@ -918,7 +941,7 @@ def inputParse(pipe_read, optparser):
         if ret_need > 0:
             ret_code = ret_need
         else:
-            Journal.createLog(options.severity, options.full_journal)
+            message = Journal.createLog(options.severity, options.full_journal)
     elif command == "addphase":
         ret_need = need((options.name, options.type))
         if ret_need > 0:
