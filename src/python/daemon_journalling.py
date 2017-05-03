@@ -315,7 +315,6 @@ class Journal(object):
                 for nod in node.iterchildren():
                     if nod.tag == "message":
                         if nod.get("severity") in Journal.getAllowedSeverities(severity):
-                            # TODO Might be problematic len()
                             if (len(nod) > 0):
                                 text = Journal.__childNodeValue(nod, 0)
                             else:
@@ -336,7 +335,6 @@ class Journal(object):
                         if returnPhaseFailed > 0:
                             phasesFailed += 1
                         message += returnPhaseLog
-        # TODO xpath problem?
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
         message += Journal.printHeadLog(testName, toVar=True)
         message += Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed), toVar=True)
@@ -534,7 +532,7 @@ class Journal(object):
 
         shre = re.compile(".+\.sh$")
         bpath = os.environ["BEAKERLIB"]
-        plugpath = os.path.join(bpath, "plugins")  # TODO ERROR ? imho to ma byt plugins a ne plugin
+        plugpath = os.path.join(bpath, "plugins")
         plugins = []
 
         if os.path.exists(plugpath):
@@ -631,7 +629,7 @@ class Journal(object):
         node = jrnl.xpath('log')
         if node:
             return node[0]
-        # TODO improve
+        # TODO improve Error handling
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
@@ -673,7 +671,6 @@ class Journal(object):
 
         log.append(phase)
 
-        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addPhase = staticmethod(addPhase)
@@ -700,7 +697,6 @@ class Journal(object):
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         type = phase.get('type')
         name = phase.get('name')
-        # TODO xpath problem
         end = jrnl.xpath('endtime')
         timeNow = time.strftime(timeFormat)
         end[0].text = timeNow
@@ -772,7 +768,6 @@ class Journal(object):
         msg.text = msgText
 
         add_to.append(msg)
-        #return 0  # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addMessage = staticmethod(addMessage)
@@ -798,7 +793,6 @@ class Journal(object):
 
         msg.text = result
         add_to.append(msg)
-        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addTest = staticmethod(addTest)
@@ -816,7 +810,6 @@ class Journal(object):
             pkgEl, pkgCon = pkg
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
-        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     logRpmVersion = staticmethod(logRpmVersion)
@@ -841,7 +834,6 @@ class Journal(object):
         metric.text = str(value)
         add_to.append(metric)
 
-        #return 0 # TODO SMAZAT
         return Journal.saveJournal(jrnl)
 
     addMetric = staticmethod(addMetric)
@@ -888,7 +880,7 @@ def signalHandler(signal, frame):
         exit(0)
 
 
-# TODO why those signals?
+# Sinals to handle
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
 signal.signal(signal.SIGHUP, signalHandler)
@@ -913,15 +905,10 @@ def inputParse(pipe_read, optparser):
 
     if args:
         command = args[0]
-        #print "COMMAND: %s" % command  # TODO SMAZAT
     else:
         # something is wrong do nothing and return 1
         command = ""
         ret_code = 1
-
-    # TODO SMAZAT
-    #print args
-    #print options
 
     if command == "init":
         # change global jrnl var
@@ -1008,9 +995,6 @@ def inputParse(pipe_read, optparser):
 
     return pipe_write
 
-
-
-# TODO global optparser?
 
 def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     DESCRIPTION = "Wrapper for operations above BeakerLib journal"
