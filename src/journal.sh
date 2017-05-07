@@ -403,9 +403,9 @@ rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
-    # ADDED TODO describe
+    # cut only last line from output (result of phase from journalling.py)
     out_last=${out##*$'\n'}
-    echo $out | tee -a "/home/jheger/frf"  # TODO SMAZAT ? rozhodne veci za |
+    #echo $out | tee -a "/home/jheger/frf"  # TODO SMAZAT ? rozhodne veci za |
     #out=$($__INTERNAL_JOURNALIST finphase)
     # TODO cut everything from out besides last line
     local score=$?
