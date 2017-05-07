@@ -448,8 +448,6 @@ rljRpmLog(){
     rljCallDaemon rpm --package "$1" >&2
 }
 
-# TODO reading with cat? something better?
-# TODO checking with pgrep? something better?
 # communicate with python daemon
 rljCallDaemon() {
     # check if daemon is still running
