@@ -156,7 +156,6 @@ class Journal(object):
 
     # @staticmethod
     def __childNodeValue(node, id=0):
-        # TODO THIS MIGHT BE WRONG !! NEEDS FURTHER TESTING
         if etree.iselement(node):
             try:
                 return node.text
@@ -164,17 +163,6 @@ class Journal(object):
                 return ''
         else:
             return ''
-
-        # COMMENTED OUT
-        """Safe variant for node.childNodes[id].nodeValue()"""
-        # TODO WTF? is this test to check if method exists? shouldn't there be parentheses?
-        # if node.hasChildNodes:
-        # try:
-        #  return node.childNodes[id].nodeValue
-        # except IndexError:
-        # return ''
-        # else:
-        #  return ''
 
     __childNodeValue = staticmethod(__childNodeValue)
 
@@ -289,7 +277,6 @@ class Journal(object):
                 for nod in node.iterchildren():
                     if nod.tag == "message":
                         if nod.get("severity") in Journal.getAllowedSeverities(severity):
-                            # TODO Might be problematic len()
                             if (len(nod) > 0):
                                 text = Journal.__childNodeValue(nod, 0)
                             else:
@@ -308,7 +295,6 @@ class Journal(object):
                         phasesProcessed += 1
                         if Journal.printPhaseLog(nod, severity) > 0:
                             phasesFailed += 1
-        # TODO xpath problem?
         testName = Journal.__childNodeValue(jrnl.xpath("testname")[0], 0)
         Journal.printHeadLog(testName)
         Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed))
@@ -504,7 +490,7 @@ class Journal(object):
 
         shre = re.compile(".+\.sh$")
         bpath = os.environ["BEAKERLIB"]
-        plugpath = os.path.join(bpath, "plugins")  # TODO ERROR ? imho to ma byt plugins a ne plugin
+        plugpath = os.path.join(bpath, "plugins")
         plugins = []
 
         if os.path.exists(plugpath):
@@ -590,13 +576,12 @@ class Journal(object):
 
     openJournal = staticmethod(openJournal)
 
-    # TODO WHY? for always returns first one, and what if none there? and if always only 1 why then for loop?
     # @staticmethod
     def getLogEl(jrnl):
-        node = jrnl.xpath('//log')
+        node = jrnl.xpath('log')
         if node:
             return node[0]
-        # TODO improve
+        # TODO improve Error handling
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
@@ -606,7 +591,7 @@ class Journal(object):
     # @staticmethod
     def getLastUnfinishedPhase(tree):
         candidate = tree
-        for node in tree.xpath('//phase'):
+        for node in tree.xpath('phase'):
             if node.get('result') == 'unfinished':
                 candidate = node
         return candidate
@@ -661,7 +646,6 @@ class Journal(object):
         phase = Journal.getLastUnfinishedPhase(Journal.getLogEl(jrnl))
         type = phase.get('type')
         name = phase.get('name')
-        # TODO xpath problem
         end = jrnl.xpath('endtime')
         timeNow = time.strftime(timeFormat)
         end[0].text = timeNow
@@ -678,6 +662,7 @@ class Journal(object):
 
     finPhase = staticmethod(finPhase)
 
+    """
     # TODO not used? Error in  'name' var
     # @staticmethod
     def getPhase(tree):
@@ -687,13 +672,14 @@ class Journal(object):
         return tree
 
     getPhase = staticmethod(getPhase)
+    """
 
     # @staticmethod
     def testState():
         jrnl = Journal.openJournal()
         failed = 0
 
-        for phase in jrnl.xpath('//phase'):
+        for phase in jrnl.xpath('phase'):
             failed += Journal.getPhaseState(phase)[1]
         if failed > 255:
             failed = 255
@@ -915,33 +901,9 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         ret_need = need((options.package,))
         if ret_need > 0:
             return ret_need
-            # TODO SMAZAT
-            # with open('/home/jheger/counter.txt', 'a') as the_file:
-            #   the_file.write('logRpmVersion() 880')
         Journal.logRpmVersion(options.package)
     return 0
 
 
 if __name__ == "__main__":
-    """
-    # TEMP setting environ vars for testing
-    os.environ['BEAKERLIB_JOURNAL'] = "/home/jheger/atmp/jrnl.lxml"
-    os.environ['TEST'] = "/CoreOS/bash/Regression/bz1172214-pattern-substitution-parameter-expansion-memleak"
-    os.environ['BEAKERLIB'] = "/usr/share/beakerlib"
-
-    jrnl = Journal()
-    jrnl.addPhase("phase1", "random_comm")
-    jrnl.addTest("lorem ipsum", result="FAIL", command="cat /etc/passwd")
-    jrnl.addTest("dolor sit amet", result="PASS", command="touch /etc/passwd")
-    jrnl.addTest("consectetur", result="FAIL", command="cp /etc/passwd .")
-    jrnl.addMessage("testmessaegaa", "LOG")
-    jrnl.finPhase()
-    # jrnl.addMetric("tip", "testname", "testvalue", "testtolerance")
-    # print "testState:", jrnl.testState()
-
-    #jrnl.createLog("LOG", full_journal=True)
-
-    jrnl.dumpJournal("pretty")
-    exit(222)
-    """
     sys.exit(main())
