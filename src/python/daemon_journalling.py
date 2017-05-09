@@ -870,7 +870,7 @@ def signalHandler(signal, frame):
         exit(0)
 
 
-# Sinals to handle
+# Signals to handle
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
 signal.signal(signal.SIGHUP, signalHandler)

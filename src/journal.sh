@@ -45,8 +45,9 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
-# TODO CHANGE
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
+
+trap "echo 'Signal trapped'; kill -15 $DAEMON_PID; exit" SIGHUP SIGINT SIGTERM
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
