@@ -45,8 +45,7 @@ printing journal contents.
 =cut
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
-# TODO CHANGE in Makefile
-__INTERNAL_ONDEMAND_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/od_journalling.py"
+__INTERNAL_ONDEMAND_JOURNALIST=beakerlib-journalling-ondemand
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # rlJournalStart
@@ -194,7 +193,7 @@ rlJournalEnd(){
         rlLog "JOURNAL TXT: $journaltext"
     fi
 
-    # TODO Last interaction with journalling.py
+    # Last interaction with od_journalling.py
     $__INTERNAL_ONDEMAND_JOURNALIST
 
 }
@@ -405,16 +404,12 @@ rljClosePhase(){
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
     # cut only last line from output (result of phase from journalling.py)
     out_last=${out##*$'\n'}
-    #echo $out | tee -a "/home/jheger/frf"  # TODO SMAZAT ? rozhodne veci za |
-    #out=$($__INTERNAL_JOURNALIST finphase)
-    # TODO cut everything from out besides last line
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
     local result="$(echo "$out_last" | cut -d ':' -f 2)"
     local name=$(echo "$out_last" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
     rlJournalPrintText > $logfile
-    #$__INTERNAL_ONDEMAND_JOURNALIST  # TODO probably outdated by finphase calling updateXML
     rlReport "$name" "$result" "$score" "$logfile"
 }
 
@@ -462,12 +457,8 @@ rljRpmLog(){
     #$__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
-# TODO Description
-# When calling this function all parameter values must be enclosed in escaped quotes (\"$1\")
+# Escapes given arguments and prints them to meta file
 rljPrintToMeta(){
-    #echo "$@" >> $BEAKERLIB_METAFILE
-    #printf %q "$@" >> $__INTERNAL_METAFILE
-    #echo >> $__INTERNAL_METAFILE # TODO add newlining into printf comamnd
     for arg in "$@"
     do
         printf %q "$arg" >> $BEAKERLIB_METAFILE

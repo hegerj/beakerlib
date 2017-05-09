@@ -495,7 +495,7 @@ class Journal(object):
 
         shre = re.compile(".+\.sh$")
         bpath = os.environ["BEAKERLIB"]
-        plugpath = os.path.join(bpath, "plugins")  # TODO ERROR ? imho to ma byt plugins a ne plugin
+        plugpath = os.path.join(bpath, "plugins")
         plugins = []
 
         if os.path.exists(plugpath):
@@ -587,7 +587,7 @@ class Journal(object):
         node = jrnl.xpath('//log')
         if node:
             return node[0]
-        # TODO improve Error Hanling
+        # TODO improve Error Handling
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
