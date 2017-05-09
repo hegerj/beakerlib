@@ -46,7 +46,7 @@ printing journal contents.
 
 __INTERNAL_JOURNALIST=beakerlib-journalling
 # TODO CHANGE
-__INTERNAL_DAEMON_JOURNALIST="/home/jheger/baka/new_breakerlib/beakerlib/src/python/daemon_journalling.py"
+__INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,7 +87,6 @@ rlJournalStart(){
     # set global BeakerLib variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
     export BEAKERLIB_PIPE="$BEAKERLIB_DIR/bash_pipe"
-    #export BEAKERLIB_PYTHON_PIPE="$BEAKERLIB_DIR/python_pipe"  # TODO SMAZAT
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
@@ -96,11 +95,10 @@ rlJournalStart(){
         exit 1
     fi
 
-    # create named pipes
+    # create named pipe
     mkfifo $BEAKERLIB_PIPE 2>/dev/null
-    #mkfifo $BEAKERLIB_PYTHON_PIPE 2>/dev/null  # TODO SMAZAT
 
-    # start daemon journalist and store its PID  # TODO need to export?
+    # start daemon journalist and store its PID
     $__INTERNAL_DAEMON_JOURNALIST &
     export DAEMON_PID=$!
 
