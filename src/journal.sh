@@ -47,7 +47,7 @@ printing journal contents.
 __INTERNAL_JOURNALIST=beakerlib-journalling
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
-trap "echo 'Signal trapped'; kill -9 $DAEMON_PID; exit" SIGHUP SIGINT SIGTERM
+trap 'echo "Signal trapped"; kill -9 "$DAEMON_PID"; exit' SIGHUP SIGINT SIGTERM
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -202,7 +202,7 @@ rlJournalEnd(){
     fi
     # kill daemon
     #PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
-    kill $DAEMON_PID
+    kill $DAEMON_PID 2> /dev/null
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
