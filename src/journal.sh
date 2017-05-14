@@ -457,8 +457,6 @@ rljCallDaemon() {
         exit 1
     fi
 
-    echo "journal.sh args: $@" # TODO SMAZAT
-
     # escape arguments
     args=$(escapeArguments "$@")
 
@@ -475,9 +473,7 @@ rljCallDaemon() {
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
-        echo -n "${BASH_REMATCH[1]}" # TODO KEEP? those who want message will catch it, for others there should be empty string
-        #echo  # TODO SMAZAT
-        #echo "code: ${BASH_REMATCH[2]}"  # TODO SMAZAT
+        echo -n "${BASH_REMATCH[1]}"
         return "${BASH_REMATCH[2]}"
     else
         return 1
@@ -492,19 +488,6 @@ escapeArguments() {
         echo -n " "
     done
 }
-## TODO SMAZAT vv Prevents make install
-#export BEAKERLIB_BASH_PIPE="/home/jheger/bash_pipe"
-#export BEAKERLIB_PYTHON_PIPE="/home/jheger/python_pipe"
-#export BEAKERLIB_JOURNAL="/home/jheger/jrnl.xml"
-#export BEAKERLIB="/usr/share/beakerlib"
-#$__INTERNAL_DAEMON_JOURNALIST &
-#rljCallDaemon init --test "basicshit" >&2
-#rljCallDaemon addphase --name "Setup" --type "WARN" >&2
-#rljCallDaemon rpm --package "bash" >&2
-#rljCallDaemon finphase
-#kill $(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
-#exit 19
-## TODO SMAZAT ^^
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUTHORS

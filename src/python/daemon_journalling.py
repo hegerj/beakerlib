@@ -1032,7 +1032,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        #pipe_read = pipe_read.decode("string_escape") # TODO SMAZAT
         pipe_write = inputParse(pipe_read, optparser)
 
         try:
