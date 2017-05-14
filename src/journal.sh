@@ -47,7 +47,8 @@ printing journal contents.
 __INTERNAL_JOURNALIST=beakerlib-journalling
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
-trap 'echo "Signal trapped"; kill -9 "$DAEMON_PID"; exit' SIGHUP SIGINT SIGTERM
+# Trap for signals, makes sure DAEMON is killed
+trap 'kill -9 "$DAEMON_PID" 2>/dev/null; exit' SIGHUP SIGINT SIGTERM
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -456,9 +457,7 @@ rljCallDaemon() {
         exit 1
     fi
 
-
-    # TODO test if PID persists, possibly does, if so replace pgrep
-    #echo "DAEMON_PID: \"$DAEMON_PID\" REMOVE ME"
+    echo "journal.sh args: $@" # TODO SMAZAT
 
     # escape arguments
     args=$(escapeArguments "$@")
