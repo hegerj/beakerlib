@@ -858,6 +858,8 @@ def updateXML(optparser, jrnl=None):
 
     queue_file = os.environ['BEAKERLIB_QUEUE']
 
+    print queue_file, "SMAZAT" # TODO SMAZAT
+
     # Opening queue file for reading and writing
     try:
         fh = open(queue_file, 'r+b')
@@ -871,7 +873,7 @@ def updateXML(optparser, jrnl=None):
     line_count = 0
     skipped_lines = 0
 
-    # Finding last 'lines read:' line, getting the number
+    # Finding last 'lines read:' line from the end of the file, getting the number
     for line in lines[::-1]:
         match = re.match(r'^lines\sread:\s(\d+)$', line)
         if match:
@@ -883,12 +885,18 @@ def updateXML(optparser, jrnl=None):
     # there is no need to read it
     if len(lines) == skipped_lines:
         fh.close()
+        print "NO NEW SMAZAT"  # TODO SMAZAT
         return 0
 
     # Reading the file from point where it stopped last
     for line in lines[skipped_lines:]:
         line_count += 1
+
+        print "line: ", line
+        print "split: ", line.decode('string_escape')
+
         (options, args) = optparser.parse_args(shlex.split(line))
+
 
         command = args[0]
         if command == "dump":
@@ -936,6 +944,7 @@ def updateXML(optparser, jrnl=None):
 
     # Write last read line to the queue file
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
+    print "LINES READ: ",  str(line_count + skipped_lines + 1), " SMAZAT" # TODO SMAZAT
     fh.close()
 
 

@@ -442,6 +442,11 @@ rljPrintToQueue(){
         echo -n " " >> $BEAKERLIB_QUEUE
     done
     echo >> $BEAKERLIB_QUEUE
+    # TODO SMAZAT vv
+    echo "--------------------------"
+    cat $BEAKERLIB_QUEUE
+    echo "--------------------------"
+    sleep 1
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
