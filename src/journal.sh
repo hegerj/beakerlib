@@ -44,7 +44,6 @@ printing journal contents.
 
 =cut
 
-__INTERNAL_JOURNALIST=beakerlib-journalling
 __INTERNAL_ONDEMAND_JOURNALIST=beakerlib-journalling-ondemand
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,13 +102,6 @@ rlJournalStart(){
         echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
         exit 1
     fi
-
-    #if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
-    #    rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
-    #else
-    #    echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
-    #    exit 1
-    #fi
 
     # display a warning message if run in POSIX mode
     if [ $POSIXFIXED == "YES" ] ; then
@@ -332,7 +324,6 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    # ADDED
     $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
 }
 
@@ -394,7 +385,6 @@ rljAddPhase(){
 
 rljClosePhase(){
     local out
-    # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
     # cut only last line from output (result of phase from od_journalling.py)
     out_last=${out##*$'\n'}
@@ -442,11 +432,6 @@ rljPrintToQueue(){
         echo -n " " >> $BEAKERLIB_QUEUE
     done
     echo >> $BEAKERLIB_QUEUE
-    # TODO SMAZAT vv
-    echo "--------------------------"
-    cat $BEAKERLIB_QUEUE
-    echo "--------------------------"
-    sleep 1
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

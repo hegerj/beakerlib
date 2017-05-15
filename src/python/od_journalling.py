@@ -851,14 +851,14 @@ def testOutOfPhase(message=None, result=None, jrnl=None):
     return 0
 
 
-# TODO DESCRIPTION
+# Opens queue file at the last point it opened it last time
+# reads lines and executes them from that point on
+# when gets to the end, makes a new mark
 def updateXML(optparser, jrnl=None):
     if jrnl is None:
         jrnl = Journal.openJournal()
 
     queue_file = os.environ['BEAKERLIB_QUEUE']
-
-    print queue_file, "SMAZAT" # TODO SMAZAT
 
     # Opening queue file for reading and writing
     try:
@@ -885,18 +885,13 @@ def updateXML(optparser, jrnl=None):
     # there is no need to read it
     if len(lines) == skipped_lines:
         fh.close()
-        print "NO NEW SMAZAT"  # TODO SMAZAT
         return 0
 
     # Reading the file from point where it stopped last
     for line in lines[skipped_lines:]:
         line_count += 1
 
-        print "line: ", line
-        print "split: ", line.decode('string_escape')
-
         (options, args) = optparser.parse_args(shlex.split(line))
-
 
         command = args[0]
         if command == "dump":
@@ -944,7 +939,6 @@ def updateXML(optparser, jrnl=None):
 
     # Write last read line to the queue file
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
-    print "LINES READ: ",  str(line_count + skipped_lines + 1), " SMAZAT" # TODO SMAZAT
     fh.close()
 
 
@@ -990,9 +984,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     else:
         command = None
 
-    # These have different behaviour than other commands
-    # these commands are processed immediately and their results a returned
-    # to journal.sh
+    # if init command comes, journal.xml is initialized
+    # if anything else journal.xml is parsed from disk
     if command == "init":
         ret_need = need((options.test,))
         if ret_need > 0:
@@ -1002,6 +995,10 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     else:
         jrnl = Journal.openJournal()
 
+
+    # These commands are processed immediately and their results a returned
+    # to journal.sh
+    # but before queue file is processed
     if command == "finphase":
         updateXML(optparser, jrnl)
         result, score, type_r, name = Journal.finPhase(jrnl=jrnl)
@@ -1034,6 +1031,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         failed = Journal.phaseState(jrnl=jrnl)
         updateXML(optparser, jrnl)
         return failed
+
 
     return 0
 
