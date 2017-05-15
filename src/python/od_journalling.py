@@ -966,11 +966,6 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
       (options, args) = optparser.parse_args(args_in)
     else:
       (options, args) = optparser.parse_args()
-    """
-    if len(args) != 1:
-      print "Non-option arguments present, argc: %s" % len(args)
-      return 1
-    """
 
     if not 'BEAKERLIB_JOURNAL' in os.environ:
         print "BEAKERLIB_JOURNAL not defined in the environment"
@@ -1010,11 +1005,9 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         updateXML(optparser, jrnl)
         ret_need = need((options.name, options.type))
         if ret_need > 0:
-            sys.stderr.write("ADDPHASE SKIPPED 1088")
             return ret_need
         ret_need = Journal.addPhase(options.name, options.type, jrnl=jrnl)
         if ret_need > 0:
-            sys.stderr.write("ADDPHASE SKIPPED 1088")
             return ret_need
         Journal.printHeadLog(options.name)
     elif command == "printlog":

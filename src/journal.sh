@@ -104,12 +104,12 @@ rlJournalStart(){
         exit 1
     fi
 
-    if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
-        rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
-    else
-        echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
-        exit 1
-    fi
+    #if $__INTERNAL_JOURNALIST init --test "$TEST" >&2; then
+    #    rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
+    #else
+    #    echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
+    #    exit 1
+    #fi
 
     # display a warning message if run in POSIX mode
     if [ $POSIXFIXED == "YES" ] ; then
@@ -255,8 +255,7 @@ Example:
 
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    rljPrintToMeta dump --type "$TYPE"
-    #$__INTERNAL_JOURNALIST dump --type "$TYPE"
+    rljPrintToQueue dump --type "$TYPE"
 }
 
 # backward compatibility
@@ -335,7 +334,6 @@ rlJournalPrintText(){
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
     # ADDED
     $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
-    #$__INTERNAL_JOURNALIST printlog --severity $SEVERITY $FULL_JOURNAL
 }
 
 # backward compatibility
@@ -359,7 +357,6 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 
 rlGetTestState(){
     $__INTERNAL_ONDEMAND_JOURNALIST teststate
-    #$__INTERNAL_JOURNALIST teststate >&2
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -380,7 +377,6 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 
 rlGetPhaseState(){
     $__INTERNAL_ONDEMAND_JOURNALIST phasestate
-    #$__INTERNAL_JOURNALIST phasestate >&2
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -393,16 +389,14 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    #rljPrintToMeta addphase --name "$MSG" --type "$1" >&2
     $__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
-    #$__INTERNAL_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
 rljClosePhase(){
     local out
     # ADDED
     out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
-    # cut only last line from output (result of phase from journalling.py)
+    # cut only last line from output (result of phase from od_journalling.py)
     out_last=${out##*$'\n'}
     local score=$?
     local logfile="$BEAKERLIB_DIR/journal.txt"
@@ -414,20 +408,7 @@ rljClosePhase(){
 }
 
 rljAddTest(){
-    rljPrintToMeta test --message "$1" --result "$2" ${3:+--command "$3"} >&2
-    #if ! eval "$__INTERNAL_JOURNALIST test --message \"\$1\" --result \"\$2\" ${3:+--command \"\$3\"}" >&2
-    #then
-      # Failed to add a test: there is no phase open
-      # So we open it, add a test, add a FAIL to let the user know
-      # he has a broken test, and close the phase again
-
-      #rljAddPhase "FAIL" "Asserts collected outside of a phase"
-      #$__INTERNAL_JOURNALIST test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
-      #$__INTERNAL_JOURNALIST test --message "$1" --result "$2" >&2
-      #rljPrintToMeta test --message "TEST BUG: Assertion not in phase" --result "FAIL" >&2
-      #rljPrintToMeta test --message "$1" --result "$2" >&2
-      #rljClosePhase
-    #fi
+    rljPrintToQueue test --message "$1" --result "$2" ${3:+--command "$3"} >&2
 }
 
 rljAddMetric(){
@@ -440,25 +421,21 @@ rljAddMetric(){
         return 1
     fi
     rlLogDebug "rljAddMetric: Storing metric $MID with value $VALUE and tolerance $TOLERANCE"
-    rljPrintToMeta metric --type "$1" --name "$MID" \
+    rljPrintToQueue metric --type "$1" --name "$MID" \
         --value "$VALUE" --tolerance "$TOLERANCE" >&2
-    #$__INTERNAL_JOURNALIST metric --type "$1" --name "$MID" \
-        #--value "$VALUE" --tolerance "$TOLERANCE" >&2
     return $?
 }
 
 rljAddMessage(){
-    rljPrintToMeta log --message "$1" --severity "$2" >&2
-    #$__INTERNAL_JOURNALIST log --message "$1" --severity "$2" >&2
+    rljPrintToQueue log --message "$1" --severity "$2" >&2
 }
 
 rljRpmLog(){
-    rljPrintToMeta rpm --package "$1" >&2
-    #$__INTERNAL_JOURNALIST rpm --package "$1" >&2
+    rljPrintToQueue rpm --package "$1" >&2
 }
 
 # Escapes given arguments and prints them to queue file
-rljPrintToMeta(){
+rljPrintToQueue(){
     for arg in "$@"
     do
         printf %q "$arg" >> $BEAKERLIB_QUEUE
