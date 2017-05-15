@@ -842,7 +842,7 @@ def testOutOfPhase(message=None, result=None, jrnl=None):
     if jrnl is None:
         jrnl = Journal.openJournal()
 
-    Journal.addPhase("FAIL", "Asserts collected outside of a phase", jrnl=jrnl)
+    Journal.addPhase("Asserts collected outside of a phase", "FAIL", jrnl=jrnl)
     Journal.printHeadLog("Asserts collected outside of a phase")
     Journal.addTest(message="TEST BUG: Assertion not in phase", result="FAIL", jrnl=jrnl)
     Journal.addTest(message=message, result=result, jrnl=jrnl)
