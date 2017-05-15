@@ -82,9 +82,9 @@ rlJournalStart(){
 
     [ -d "$BEAKERLIB_DIR" ] || mkdir -p "$BEAKERLIB_DIR"
 
-    # set global BeakerLib journal and metafile variables for future use
+    # set global BeakerLib journal and queue file variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
-    export BEAKERLIB_METAFILE="$BEAKERLIB_DIR/journal.meta"
+    export BEAKERLIB_QUEUE="$BEAKERLIB_DIR/journal.queue"
 
 
     # make sure the directory is ready, otherwise we cannot continue
@@ -94,7 +94,7 @@ rlJournalStart(){
         exit 1
     fi
 
-    touch $BEAKERLIB_METAFILE
+    touch $BEAKERLIB_QUEUE
 
     # finally initialize the journal
     if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
@@ -457,14 +457,14 @@ rljRpmLog(){
     #$__INTERNAL_JOURNALIST rpm --package "$1" >&2
 }
 
-# Escapes given arguments and prints them to meta file
+# Escapes given arguments and prints them to queue file
 rljPrintToMeta(){
     for arg in "$@"
     do
-        printf %q "$arg" >> $BEAKERLIB_METAFILE
-        echo -n " " >> $BEAKERLIB_METAFILE
+        printf %q "$arg" >> $BEAKERLIB_QUEUE
+        echo -n " " >> $BEAKERLIB_QUEUE
     done
-    echo >> $BEAKERLIB_METAFILE
+    echo >> $BEAKERLIB_QUEUE
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

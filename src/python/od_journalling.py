@@ -856,16 +856,16 @@ def updateXML(optparser, jrnl=None):
     if jrnl is None:
         jrnl = Journal.openJournal()
 
-    metafile = os.environ['BEAKERLIB_METAFILE']
+    queue_file = os.environ['BEAKERLIB_QUEUE']
 
-    # Opening metafile for reading and writing
+    # Opening queue file for reading and writing
     try:
-        fh = open(metafile, 'r+b')
+        fh = open(queue_file, 'r+b')
     except IOError as e:
-        Journal.printLog('Failed to open metafile with: ' + str(e) , 'BEAKERLIB_WARNING')
+        Journal.printLog('Failed to open queue file with: ' + str(e) , 'BEAKERLIB_WARNING')
         return 1
 
-    # Reading metafile by lines
+    # Reading queue file by lines
     lines = fh.readlines()
 
     line_count = 0
@@ -934,7 +934,7 @@ def updateXML(optparser, jrnl=None):
             Journal.logRpmVersion(options.package, jrnl=jrnl)
             continue
 
-    # Write last read line to the meta file
+    # Write last read line to the queue file
     fh.write("lines read: " + str(line_count + skipped_lines + 1) + "\n")
     fh.close()
 
@@ -976,8 +976,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_JOURNAL not defined in the environment"
         return 1
 
-    if not 'BEAKERLIB_METAFILE' in os.environ:
-        print "BEAKERLIB_METAFILE not defined in the environment"
+    if not 'BEAKERLIB_QUEUE' in os.environ:
+        print "BEAKERLIB_QUEUE not defined in the environment"
         return 1
 
     # If called with argument
