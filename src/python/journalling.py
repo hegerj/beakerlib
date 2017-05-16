@@ -581,9 +581,8 @@ class Journal(object):
         node = jrnl.xpath('log')
         if node:
             return node[0]
-        # TODO improve Error handling
         else:
-            Journal.printLog("Failed to find \'log\' element")
+            Journal.printLog("Failed to find \'log\' element", 'BEAKERLIB_WARNING')
             sys.exit(1)
 
     getLogEl = staticmethod(getLogEl)
