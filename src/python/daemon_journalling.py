@@ -683,15 +683,17 @@ class Journal(object):
         return (phase.get('result'), phase.get('score'), type, name)
     finPhase = staticmethod(finPhase)
 
-    # # TODO not used? Error in  'name' var
-    # # @staticmethod
-    # def getPhase(tree):
-    #     for node in tree.xpath("phase"):
-    #         if node.getAttribute("name") == name:
-    #             return node
-    #     return tree
-    #
-    # getPhase = staticmethod(getPhase)
+    """
+    # TODO not used? Error in  'name' var
+    # @staticmethod
+    def getPhase(tree):
+        for node in tree.xpath("phase"):
+            if node.getAttribute("name") == name:
+                return node
+        return tree
+
+    getPhase = staticmethod(getPhase)
+    """
 
     # @staticmethod
     def testState():
@@ -886,7 +888,7 @@ def parseAndProcess(pipe_read, optparser):
     if args:
         command = args[0]
     else:
-        # something is wrong do nothing and return 1
+        # something is wrong, do nothing and return 1
         command = ""
         ret_code = 1
 
