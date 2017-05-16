@@ -484,7 +484,7 @@ class Journal(object):
 
         shre = re.compile(".+\.sh$")
         bpath = os.environ["BEAKERLIB"]
-        plugpath = os.path.join(bpath, "plugin")
+        plugpath = os.path.join(bpath, "plugins")
         plugins = []
 
         if os.path.exists(plugpath):
@@ -543,7 +543,6 @@ class Journal(object):
             output.close()
             return 0
         except IOError, e:
-            # TODO Error handling
             Journal.printLog('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')
             return 1
     saveJournal = staticmethod(saveJournal)
@@ -574,9 +573,8 @@ class Journal(object):
         node = jrnl.xpath('//log')
         if node:
             return node[0]
-        # TODO improve Error Handling
         else:
-            Journal.printLog("Failed to find \'log\' element")
+            Journal.printLog("Failed to find \'log\' element", 'BEAKERLIB_WARNING')
             sys.exit(1)
     getLogEl = staticmethod(getLogEl)
 
