@@ -44,7 +44,7 @@ printing journal contents.
 
 =cut
 
-__INTERNAL_ONDEMAND_JOURNALIST=beakerlib-journalling-ondemand
+__INTERNAL_QUEUED_JOURNALIST=beakerlib-queued-journalling
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # rlJournalStart
@@ -96,7 +96,7 @@ rlJournalStart(){
     touch $BEAKERLIB_QUEUE
 
     # finally initialize the journal
-    if $__INTERNAL_ONDEMAND_JOURNALIST init --test "$TEST" >&2; then
+    if $__INTERNAL_QUEUED_JOURNALIST init --test "$TEST" >&2; then
         rlLogDebug "rlJournalStart: Journal successfully initilized in $BEAKERLIB_DIR"
     else
         echo "rlJournalStart: Failed to initialize the journal. Bailing out..."
@@ -186,7 +186,7 @@ rlJournalEnd(){
     fi
 
     # Last interaction with od_journalling.py
-    $__INTERNAL_ONDEMAND_JOURNALIST
+    $__INTERNAL_QUEUED_JOURNALIST
 
 }
 
@@ -324,7 +324,7 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    $__INTERNAL_ONDEMAND_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
+    $__INTERNAL_QUEUED_JOURNALIST printlog --severity "$SEVERITY" "$FULL_JOURNAL"
 }
 
 # backward compatibility
@@ -347,7 +347,7 @@ Returns number of failed asserts in so far, 255 if there are more then 255 failu
 =cut
 
 rlGetTestState(){
-    $__INTERNAL_ONDEMAND_JOURNALIST teststate
+    $__INTERNAL_QUEUED_JOURNALIST teststate
     ECODE=$?
     rlLogDebug "rlGetTestState: $ECODE failed assert(s) in test"
     return $ECODE
@@ -367,7 +367,7 @@ Returns number of failed asserts in current phase so far, 255 if there are more 
 =cut
 
 rlGetPhaseState(){
-    $__INTERNAL_ONDEMAND_JOURNALIST phasestate
+    $__INTERNAL_QUEUED_JOURNALIST phasestate
     ECODE=$?
     rlLogDebug "rlGetPhaseState: $ECODE failed assert(s) in phase"
     return $ECODE
@@ -380,12 +380,12 @@ rlGetPhaseState(){
 rljAddPhase(){
     local MSG=${2:-"Phase of $1 type"}
     rlLogDebug "rljAddPhase: Phase $MSG started"
-    $__INTERNAL_ONDEMAND_JOURNALIST addphase --name "$MSG" --type "$1" >&2
+    $__INTERNAL_QUEUED_JOURNALIST addphase --name "$MSG" --type "$1" >&2
 }
 
 rljClosePhase(){
     local out
-    out=$($__INTERNAL_ONDEMAND_JOURNALIST finphase)
+    out=$($__INTERNAL_QUEUED_JOURNALIST finphase)
     # cut only last line from output (result of phase from od_journalling.py)
     out_last=${out##*$'\n'}
     local score=$?
