@@ -803,14 +803,26 @@ class Journal(object):
     addMetric = staticmethod(addMetric)
 
     # @staticmethod
-    def dumpJournal(type):
+    def dumpJournal(type, toVar=None):
+        returnMessage=""
         global jrnl
-        if type == "raw":
-            print etree.tostring(jrnl, encoding="utf-8", xml_declaration=True)
-        elif type == "pretty":
-            print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
+        if toVar == True:
+            if type == "raw":
+                returnMessage = etree.tostring(jrnl, encoding="utf-8", xml_declaration=True)
+            elif type == "pretty":
+                returnMessage = etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
+            else:
+                returnMessage = "Journal dump error: bad type specification"
+            return returnMessage
         else:
-            print "Journal dump error: bad type specification"
+            if type == "raw":
+                print etree.tostring(jrnl, encoding="utf-8", xml_declaration=True)
+            elif type == "pretty":
+                print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
+            else:
+                print "Journal dump error: bad type specification"
+                return 1
+            return 0
     dumpJournal = staticmethod(dumpJournal)
 
 
@@ -892,7 +904,10 @@ def parseAndProcess(pipe_read, optparser):
         if ret_need > 0:
             ret_code = ret_need
         else:
-            Journal.dumpJournal(options.type)
+            if options.message == "toVar":
+                message = Journal.dumpJournal(options.type, toVar=True)
+            else:
+                ret_code = Journal.dumpJournal(options.type)
     elif command == "printlog":
         ret_need = need((options.severity, options.full_journal))
         if ret_need > 0:
@@ -902,6 +917,7 @@ def parseAndProcess(pipe_read, optparser):
                 message = Journal.createLog(options.severity, options.full_journal, toVar=True)
             else:
                 Journal.createLog(options.severity, options.full_journal)
+                ret_code = 0
     elif command == "addphase":
         ret_need = need((options.name, options.type))
         if ret_need > 0:

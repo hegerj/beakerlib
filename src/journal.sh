@@ -46,7 +46,7 @@ printing journal contents.
 
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
-# Trap for signals, makes sure DAEMON is killed
+# Trap for signals, makes sure Daemon is killed
 trap 'kill -9 "$BEAKERLIB_DAEMONPID" 2>/dev/null; exit' SIGHUP SIGINT SIGTERM
 
 
@@ -262,9 +262,11 @@ Example:
 
 =cut
 
+# For optional --message argument see
+# description of function rlJournalPrintText()
 rlJournalPrint(){
     local TYPE=${1:-"pretty"}
-    rljCallDaemon dump --type "$TYPE"
+    rljCallDaemon dump --type "$TYPE" --message "$1"
 }
 
 # backward compatibility
