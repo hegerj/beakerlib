@@ -851,7 +851,9 @@ def need(args):
         return 1
 
 
-# TODO describe
+# Proper exit point of daemon
+# Tries to save XML object to journal location and exits
+# successfully or not depending on whether saving succeeded
 def saveAndExit():
     # path to Journal
     journal = os.environ['BEAKERLIB_JOURNAL']
@@ -868,7 +870,8 @@ def saveAndExit():
         exit(0)
 
 
-# TODO describe
+# When any of bellow defined signals is caught
+# print message to the user and exit properly
 def signalHandler(signal, frame):
     print "daemon_journalling.py: Received signal %s" % signal
     saveAndExit()
