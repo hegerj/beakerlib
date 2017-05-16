@@ -189,7 +189,7 @@ rlJournalEnd(){
     fi
     local journal="$BEAKERLIB_JOURNAL"
     local journaltext="$BEAKERLIB_DIR/journal.txt"
-    rlJournalPrintText > $journaltext
+    rlJournalPrintText "toVar" > $journaltext
 
     if [ -z "$BEAKERLIB_COMMAND_SUBMIT_LOG" ]
     then
@@ -342,7 +342,7 @@ rlJournalPrintText(){
     local FULL_JOURNAL=''
     [ "$1" == '--full-journal' ] && FULL_JOURNAL='--full-journal'
     [ "$DEBUG" == 'true' -o "$DEBUG" == '1' ] && SEVERITY="DEBUG"
-    rljCallDaemon printlog --severity $SEVERITY $FULL_JOURNAL
+    rljCallDaemon printlog --message "$1" --severity $SEVERITY $FULL_JOURNAL
 }
 
 # backward compatibility
@@ -409,7 +409,7 @@ rljClosePhase(){
     local result="$(echo "$out" | cut -d ':' -f 2)"
     local name=$(echo "$out" | cut -d ':' -f 3- | sed 's/[^[:alnum:]]\+/-/g')
     rlLogDebug "rljClosePhase: Phase $name closed"
-    rlJournalPrintText > $logfile
+    rlJournalPrintText "toVar" > $logfile
     rlReport "$name" "$result" "$score" "$logfile"
 }
 
@@ -477,7 +477,6 @@ rljCallDaemon() {
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
         # if caller expects string as a output it will caught
         # otherwise match will be empty and nothing is printed
-        echo -n "${BASH_REMATCH[1]}" >> ~/message  # TODO SMAZAT
         echo -n "${BASH_REMATCH[1]}"
         # return code
         return "${BASH_REMATCH[2]}"
