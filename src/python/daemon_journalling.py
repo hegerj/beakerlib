@@ -45,7 +45,7 @@ termColors = {
     "WARNING": "\033[0;33m"}
 
 
-# using global variable for journal object
+# using global variable for the journal object
 jrnl = None
 
 
@@ -884,10 +884,11 @@ signal.signal(signal.SIGBUS, signalHandler)
 signal.signal(signal.SIGPIPE, signalHandler)
 
 
-# TODO COMMENT
+# This method takes input read from pipe and parses it with optparser,
+# then depending on which command is read executes respective method
+# to modify xml object
 def inputParse(pipe_read, optparser):
     # parse input
-    print pipe_read  # TODO SMAZAT !!!
     (options, args) = optparser.parse_args(shlex.split(pipe_read))
 
     # vars to return to journal.sh
@@ -981,7 +982,7 @@ def inputParse(pipe_read, optparser):
             ret_code = ret_need
         Journal.logRpmVersion(options.package)
 
-    # creating return message
+    # creating coded return message
     pipe_write = "message:%s-code:%s" % (message, str(ret_code))
 
     return pipe_write

@@ -44,7 +44,7 @@ printing journal contents.
 
 =cut
 
-__INTERNAL_JOURNALIST=beakerlib-journalling
+#__INTERNAL_JOURNALIST=beakerlib-journalling
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
 # Trap for signals, makes sure DAEMON is killed
@@ -88,7 +88,7 @@ rlJournalStart(){
 
     # set global BeakerLib variables for future use
     export BEAKERLIB_JOURNAL="$BEAKERLIB_DIR/journal.xml"
-    export BEAKERLIB_PIPE="$BEAKERLIB_DIR/bash_pipe"
+    export BEAKERLIB_PIPE="$BEAKERLIB_DIR/communication_pipe"
 
     # make sure the directory is ready, otherwise we cannot continue
     if [ ! -d "$BEAKERLIB_DIR" ] ; then
