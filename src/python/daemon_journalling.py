@@ -891,7 +891,7 @@ signal.signal(signal.SIGPIPE, signalHandler)
 # This method takes input read from pipe and parses it with optparser,
 # then depending on which command is read executes respective method
 # to modify xml object
-def parseAndModify(pipe_read, optparser):
+def parseAndProcess(pipe_read, optparser):
     # parse input
     (options, args) = optparser.parse_args(shlex.split(pipe_read))
 
@@ -907,7 +907,7 @@ def parseAndModify(pipe_read, optparser):
         ret_code = 1
 
     if command == "init":
-        # change global jrnl var
+        # to be able to change global jrnl var
         global jrnl
         ret_need = need((options.test,))
         if ret_need > 0:
@@ -1049,17 +1049,13 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        pipe_write = parseAndModify(pipe_read, optparser)
-
-        try:
-            os.stat(pipe)
-        except:
-            sys.stderr.write("%s does not exist" % str(pipe))
-            return 1
-
-        pp = open(pipe, 'w')
-        pp.write("%s\n" % pipe_write)
-        pp.close()
+        # perform modification on xml object and
+        # read coded message to write into pipe
+        pipe_write = parseAndProcess(pipe_read, optparser)
+        # open pipe for writing
+        pw = open(pipe, 'w')
+        pw.write("%s\n" % pipe_write)
+        pw.close()
 
 
 if __name__ == "__main__":

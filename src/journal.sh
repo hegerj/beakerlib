@@ -478,10 +478,14 @@ rljCallDaemon() {
 
     # parse to daemon answer
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
+        # if caller expects string as a output it will caught
+        # otherwise match will be empty and nothing is printed
         echo -n "${BASH_REMATCH[1]}"
+        # return code
         return "${BASH_REMATCH[2]}"
+    # something went wrong, response could not be decoded - return error code
     else
-        return 1
+        return 2
     fi
 
 }
