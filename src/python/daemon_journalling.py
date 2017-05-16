@@ -60,7 +60,6 @@ class Journal(object):
                                                        word),
                       text.split(' ')
                       )
-
     wrap = staticmethod(wrap)
 
     # for output redirected to file, we must not rely on python's
@@ -82,7 +81,6 @@ class Journal(object):
         returnMessage += Journal.printHeadLog("Test description", toVar=toVar)
         returnMessage += Journal._print(Journal.wrap(message, 80), toVar=toVar)
         return returnMessage
-
     printPurpose = staticmethod(printPurpose)
 
     # @staticmethod
@@ -98,7 +96,6 @@ class Journal(object):
             else:
                 returnMessage += Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line), toVar=True)
         return returnMessage
-
     printLog = staticmethod(printLog)
 
     # @staticmethod
@@ -113,7 +110,6 @@ class Journal(object):
             returnMessage += Journal.printLog(message, toVar=True)
             returnMessage += "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
             return returnMessage
-
     printHeadLog = staticmethod(printHeadLog)
 
     # @staticmethod
@@ -123,7 +119,6 @@ class Journal(object):
         for i in severities:
             if (severities[i] >= severities[treshhold]): allowed_severities.append(i)
         return allowed_severities
-
     getAllowedSeverities = staticmethod(getAllowedSeverities)
 
     # @staticmethod
@@ -174,7 +169,6 @@ class Journal(object):
         returnMessage += Journal.printLog("Assertions: %s good, %s bad" % (passed, failed), toVar=True)
         returnMessage += Journal.printLog("RESULT: %s" % phaseName, phaseResult, toVar=True)
         return returnMessage, failed
-
     printPhaseLog = staticmethod(printPhaseLog)
 
     # @staticmethod
@@ -186,7 +180,6 @@ class Journal(object):
                 return ''
         else:
             return ''
-
     __childNodeValue = staticmethod(__childNodeValue)
 
     # @staticmethod
@@ -206,7 +199,6 @@ class Journal(object):
         except:
             pass
         return "%s x %s" % (count, type)
-
     __get_hw_cpu = staticmethod(__get_hw_cpu)
 
     # @staticmethod
@@ -225,7 +217,6 @@ class Journal(object):
         except:
             pass
         return "%s MB" % size
-
     __get_hw_ram = staticmethod(__get_hw_ram)
 
     # @staticmethod
@@ -249,7 +240,6 @@ class Journal(object):
             return 'unknown'
         else:
             return "%.1f GB" % size
-
     __get_hw_hdd = staticmethod(__get_hw_hdd)
 
     # @staticmethod
@@ -331,7 +321,6 @@ class Journal(object):
         message += Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"), toVar=True)
 
         return message
-
     createLog = staticmethod(createLog)
 
     # @staticmethod
@@ -346,7 +335,6 @@ class Journal(object):
 
         buildtime = time.gmtime(int(testInfo.next().format("%{BUILDTIME}")))
         return time.strftime(timeFormat, buildtime)
-
     getTestRpmBuilt = staticmethod(getTestRpmBuilt)
 
     # @staticmethod
@@ -358,7 +346,6 @@ class Journal(object):
             except IndexError:
                 envPackage = None
         return envPackage
-
     determinePackage = staticmethod(determinePackage)
 
     # @staticmethod
@@ -379,7 +366,6 @@ class Journal(object):
             rpms.append((pkgDetailsEl, pkgDetailsCon))
 
         return rpms
-
     getRpmVersion = staticmethod(getRpmVersion)
 
     # @staticmethod
@@ -404,14 +390,12 @@ class Journal(object):
             rpmVersions = Journal.getRpmVersion(xmldoc, pkgname, ts)
             if rpmVersions:
                 pkgdetails.extend(rpmVersions)
-
         return pkgdetails
 
     collectPackageDetails = staticmethod(collectPackageDetails)
 
     # @staticmethod
     def initializeJournal(test, package):
-
         # if the journal already exists, do not overwrite it
         try:
             jrnl = Journal._openJournal()
@@ -569,7 +553,6 @@ class Journal(object):
         top_element.append(logEl)
 
         return (top_element, Journal.saveJournal(top_element))
-
     initializeJournal = staticmethod(initializeJournal)
 
     # @staticmethod
@@ -583,7 +566,6 @@ class Journal(object):
         except IOError, e:
             Journal.printLog('Failed to save journal to %s: %s' % (top_element, str(e)), 'BEAKERLIB_WARNING')
             return 1
-
     saveJournal = staticmethod(saveJournal)
 
     # @staticmethod
@@ -591,7 +573,6 @@ class Journal(object):
         journal = os.environ['BEAKERLIB_JOURNAL']
         jrnl = etree.parse(journal)
         return jrnl
-
     _openJournal = staticmethod(_openJournal)
 
     # @staticmethod
@@ -611,7 +592,6 @@ class Journal(object):
             return jrnl
         else:
             return jrnl
-
     openJournal = staticmethod(openJournal)
 
     # @staticmethod
@@ -622,7 +602,6 @@ class Journal(object):
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
-
     getLogEl = staticmethod(getLogEl)
 
     # @staticmethod
@@ -632,7 +611,6 @@ class Journal(object):
             if node.get('result') == 'unfinished':
                 candidate = node
         return candidate
-
     getLastUnfinishedPhase = staticmethod(getLastUnfinishedPhase)
 
     # @staticmethod
@@ -661,7 +639,6 @@ class Journal(object):
         log.append(phase)
 
         return Journal.saveJournal(jrnl)
-
     addPhase = staticmethod(addPhase)
 
     # @staticmethod
@@ -675,7 +652,6 @@ class Journal(object):
                 else:
                     passed += 1
         return (passed, failed)
-
     getPhaseState = staticmethod(getPhaseState)
 
     # @staticmethod
@@ -699,7 +675,6 @@ class Journal(object):
         phase.set('score', str(failed))
         Journal.saveJournal(jrnl)
         return (phase.get('result'), phase.get('score'), type, name)
-
     finPhase = staticmethod(finPhase)
 
     # # TODO not used? Error in  'name' var
@@ -724,7 +699,6 @@ class Journal(object):
         if failed > 255:
             failed = 255
         return failed
-
     testState = staticmethod(testState)
 
     # @staticmethod
@@ -737,7 +711,6 @@ class Journal(object):
         if failed > 255:
             failed = 255
         return failed
-
     phaseState = staticmethod(phaseState)
 
     # @staticmethod
@@ -758,7 +731,6 @@ class Journal(object):
 
         add_to.append(msg)
         return Journal.saveJournal(jrnl)
-
     addMessage = staticmethod(addMessage)
 
     # @staticmethod
@@ -783,7 +755,6 @@ class Journal(object):
         msg.text = result
         add_to.append(msg)
         return Journal.saveJournal(jrnl)
-
     addTest = staticmethod(addTest)
 
     # @staticmethod
@@ -800,7 +771,6 @@ class Journal(object):
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
         return Journal.saveJournal(jrnl)
-
     logRpmVersion = staticmethod(logRpmVersion)
 
     # @staticmethod
@@ -824,7 +794,6 @@ class Journal(object):
         add_to.append(metric)
 
         return Journal.saveJournal(jrnl)
-
     addMetric = staticmethod(addMetric)
 
     # @staticmethod
@@ -836,7 +805,6 @@ class Journal(object):
             print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
         else:
             print "Journal dump error: bad type specification"
-
     dumpJournal = staticmethod(dumpJournal)
 
     def need(args):

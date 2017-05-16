@@ -107,15 +107,12 @@ rlJournalStart(){
     $__INTERNAL_DAEMON_JOURNALIST &
     export BEAKERLIB_DAEMONPID=$!
 
-
-
     # check if daemon is running
     if ! kill -0 $BEAKERLIB_DAEMONPID 2>/dev/null; then
         echo "rlJournalStart: Failed to start Journalling daemon."
         echo "rlJournalStart: Cannot continue, exiting..."
         exit 1
     fi
-
 
     # finally initialize the journal
     if rljCallDaemon init --test "$TEST" >&2; then
@@ -480,6 +477,7 @@ rljCallDaemon() {
     if [[ $response =~ ^message:(.*)-code:([[:digit:]]+)$ ]]; then
         # if caller expects string as a output it will caught
         # otherwise match will be empty and nothing is printed
+        echo -n "${BASH_REMATCH[1]}" >> ~/message  # TODO SMAZAT
         echo -n "${BASH_REMATCH[1]}"
         # return code
         return "${BASH_REMATCH[2]}"
