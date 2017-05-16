@@ -619,7 +619,6 @@ class Journal(object):
         node = jrnl.xpath('log')
         if node:
             return node[0]
-        # TODO improve Error handling
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
@@ -859,18 +858,17 @@ def saveAndExit():
     # using global variable
     global jrnl
     if jrnl is None:
-        print "daemon_journalling.py: Failed to save journal %s exiting..." % journal  # TODO Error handling SMAZAT 1 a 2 AT THE END OF STRING!!!!!
+        sys.stderr.write("daemon_journalling.py: Failed to save journal %s exiting..." % journal )
         exit(1)
     else:
         if Journal.saveJournal(jrnl):
-            print "daemon_journalling.py: Failed to save journal %s exiting..." % journal  # TODO Error handling
+            sys.stderr.write("daemon_journalling.py: Failed to save journal %s exiting..." % journal)
             exit(1)
         print "daemon_journalling.py: Saved journal to %s. Exiting successfully..." % journal
         exit(0)
 
 
 # TODO describe
-# TODO ? in sighandler send final ERR to pipe not to block it
 def signalHandler(signal, frame):
     print "daemon_journalling.py: Received signal %s" % signal
     saveAndExit()
@@ -893,7 +891,7 @@ signal.signal(signal.SIGPIPE, signalHandler)
 # This method takes input read from pipe and parses it with optparser,
 # then depending on which command is read executes respective method
 # to modify xml object
-def inputParse(pipe_read, optparser):
+def parseAndModify(pipe_read, optparser):
     # parse input
     (options, args) = optparser.parse_args(shlex.split(pipe_read))
 
@@ -1011,17 +1009,16 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     optparser.add_option("--type", default=None, dest="type")
     optparser.add_option("-c", "--command", default=None, dest="command", metavar="COMMAND")
 
-    # TODO better Error handling
     if not 'BEAKERLIB_JOURNAL' in os.environ:
-        print "BEAKERLIB_JOURNAL not defined in the environment"
+        sys.stderr.write("BEAKERLIB_JOURNAL not defined in the environment")
         exit(1)
 
     if not 'BEAKERLIB_PIPE' in os.environ:
-        print "BEAKERLIB_BASH_PIPE not defined in the environment"
+        sys.stderr.write("BEAKERLIB_BASH_PIPE not defined in the environment")
         exit(1)
 
     if not 'BEAKERLIB_TESTPID' in os.environ:
-        print "BEAKERLIB_TESTPID not defined in the environment"
+        sys.stderr.write("BEAKERLIB_TESTPID not defined in the environment")
         exit(1)
 
     test_pid = os.environ['BEAKERLIB_TESTPID']
@@ -1030,8 +1027,8 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
     # Check whether named pipe exists
     try:
         os.stat(pipe)
-    except:  # TODO better Error handling
-        print "%s does not exist" % str(pipe)
+    except:
+        sys.stderr.write("%s does not exist" % str(pipe))
         exit(1)
 
     # Main loop
@@ -1040,7 +1037,7 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         try:
             os.kill(int(test_pid), 0)
         except:
-            print "daemon_journalling.py: Test process not running."
+            sys.stderr.write("daemon_journalling.py: Test process not running.")
             saveAndExit()
 
         pipe_read = ""
@@ -1052,12 +1049,12 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
                     break
                 pipe_read += data
 
-        pipe_write = inputParse(pipe_read, optparser)
+        pipe_write = parseAndModify(pipe_read, optparser)
 
         try:
             os.stat(pipe)
-        except:  # TODO better Error handling
-            print "%s does not exist" % str(pipe)
+        except:
+            sys.stderr.write("%s does not exist" % str(pipe))
             return 1
 
         pp = open(pipe, 'w')
@@ -1067,3 +1064,4 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
 
 if __name__ == "__main__":
     sys.exit(main())
+
