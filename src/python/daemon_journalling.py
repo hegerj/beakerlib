@@ -139,7 +139,7 @@ class Journal(object):
             duration = time.mktime(time.strptime(endtime, timeFormat)) - time.mktime(
                 time.strptime(starttime, timeFormat))
         except ValueError:
-            # I know about two occurences:
+            # I know about two occurrences:
             #   - timezones / time messed with in the test
             #   - python cannot handle the format (probably a python bug)
             duration = None
@@ -853,10 +853,9 @@ def need(args):
 
 
 # TODO describe
-# TODO ? in sighandler send final ERR to pipe not to block it
-def signalHandler(signal, frame):
+def saveAndExit():
+    # path to Journal
     journal = os.environ['BEAKERLIB_JOURNAL']
-    print "daemon_journalling.py: Received signal %s" % signal
     # using global variable
     global jrnl
     if jrnl is None:
@@ -868,6 +867,13 @@ def signalHandler(signal, frame):
             exit(1)
         print "daemon_journalling.py: Saved journal to %s. Exiting successfully..." % journal
         exit(0)
+
+
+# TODO describe
+# TODO ? in sighandler send final ERR to pipe not to block it
+def signalHandler(signal, frame):
+    print "daemon_journalling.py: Received signal %s" % signal
+    saveAndExit()
 
 
 # Signals to handle
@@ -1014,15 +1020,28 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
         print "BEAKERLIB_BASH_PIPE not defined in the environment"
         exit(1)
 
+    if not 'BEAKERLIB_TESTPID' in os.environ:
+        print "BEAKERLIB_TESTPID not defined in the environment"
+        exit(1)
+
+    test_pid = os.environ['BEAKERLIB_TESTPID']
     pipe = os.environ['BEAKERLIB_PIPE']
+
+    # Check whether named pipe exists
+    try:
+        os.stat(pipe)
+    except:  # TODO better Error handling
+        print "%s does not exist" % str(pipe)
+        exit(1)
 
     # Main loop
     while True:
+        # Check whether test is still running
         try:
-            os.stat(pipe)
-        except:  # TODO better Error handling
-            print "%s does not exist" % str(pipe)
-            return 1
+            os.kill(int(test_pid), 0)
+        except:
+            print "daemon_journalling.py: Test process not running."
+            saveAndExit()
 
         pipe_read = ""
         # reading from pipe as log as something is there

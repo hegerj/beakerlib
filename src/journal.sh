@@ -48,7 +48,7 @@ printing journal contents.
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
 # Trap for signals, makes sure DAEMON is killed
-trap 'kill -9 "$DAEMON_PID" 2>/dev/null; exit' SIGHUP SIGINT SIGTERM
+trap 'kill -9 "$BEAKERLIB_DAEMONPID" 2>/dev/null; exit' SIGHUP SIGINT SIGTERM
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,12 +100,17 @@ rlJournalStart(){
     # create named pipe
     mkfifo $BEAKERLIB_PIPE 2>/dev/null
 
+    # export its own PID for daemon to check
+    export BEAKERLIB_TESTPID=$$
+
     # start daemon journalist and store its PID
     $__INTERNAL_DAEMON_JOURNALIST &
-    export DAEMON_PID=$!
+    export BEAKERLIB_DAEMONPID=$!
+
+
 
     # check if daemon is running
-    if ! kill -0 $DAEMON_PID 2>/dev/null; then
+    if ! kill -0 $BEAKERLIB_DAEMONPID 2>/dev/null; then
         echo "rlJournalStart: Failed to start Journalling daemon."
         echo "rlJournalStart: Cannot continue, exiting..."
         exit 1
@@ -203,7 +208,7 @@ rlJournalEnd(){
     fi
     # kill daemon
     #PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
-    kill $DAEMON_PID 2> /dev/null
+    kill $BEAKERLIB_DAEMONPID 2> /dev/null
 }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -450,15 +455,15 @@ rljRpmLog(){
 
 # communicate with python daemon
 rljCallDaemon() {
+    # escape arguments
+    args=$(escapeArguments "$@")
+
     # check if daemon is still running
-    if ! kill -0 $DAEMON_PID 2>/dev/null; then
+    if ! kill -0 $BEAKERLIB_DAEMONPID 2>/dev/null; then
         echo "rljCallDaemon: Failed to find running Journalling daemon."
         echo "rljCallDaemon: Cannot continue, exiting..."
         exit 1
     fi
-
-    # escape arguments
-    args=$(escapeArguments "$@")
 
     # write to pipe
     echo -n "$args" > $BEAKERLIB_PIPE
@@ -481,7 +486,9 @@ rljCallDaemon() {
 
 }
 
-# TODO description
+# Escapes arguments it is called with by using
+# print %q and echoes them back to rljCallDaemon()
+# which captures them
 escapeArguments() {
     for arg in "$@"; do
         printf %q "$arg"
