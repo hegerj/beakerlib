@@ -56,7 +56,6 @@ class Journal(object):
                                                        word),
                       text.split(' ')
                       )
-
     wrap = staticmethod(wrap)
 
     # for output redirected to file, we must not rely on python's
@@ -67,14 +66,12 @@ class Journal(object):
             print message.encode('utf-8', 'replace')
         else:
             print message
-
     _print = staticmethod(_print)
 
     # @staticmethod
     def printPurpose(message):
         Journal.printHeadLog("Test description")
         Journal._print(Journal.wrap(message, 80))
-
     printPurpose = staticmethod(printPurpose)
 
     # @staticmethod
@@ -85,7 +82,6 @@ class Journal(object):
             uncolor = "\033[0m"
         for line in message.split("\n"):
             Journal._print(":: [%s%s%s] :: %s" % (color, prefix.center(10), uncolor, line))
-
     printLog = staticmethod(printLog)
 
     # @staticmethod
@@ -93,7 +89,6 @@ class Journal(object):
         print "\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
         Journal.printLog(message)
         print "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n"
-
     printHeadLog = staticmethod(printHeadLog)
 
     # @staticmethod
@@ -103,7 +98,6 @@ class Journal(object):
         for i in severities:
             if (severities[i] >= severities[treshhold]): allowed_severities.append(i)
         return allowed_severities
-
     getAllowedSeverities = staticmethod(getAllowedSeverities)
 
     # @staticmethod
@@ -153,7 +147,6 @@ class Journal(object):
         Journal.printLog("Assertions: %s good, %s bad" % (passed, failed))
         Journal.printLog("RESULT: %s" % phaseName, phaseResult)
         return failed
-
     printPhaseLog = staticmethod(printPhaseLog)
 
     # @staticmethod
@@ -165,7 +158,6 @@ class Journal(object):
                 return ''
         else:
             return ''
-
     __childNodeValue = staticmethod(__childNodeValue)
 
     # @staticmethod
@@ -185,7 +177,6 @@ class Journal(object):
         except:
             pass
         return "%s x %s" % (count, type)
-
     __get_hw_cpu = staticmethod(__get_hw_cpu)
 
     # @staticmethod
@@ -204,7 +195,6 @@ class Journal(object):
         except:
             pass
         return "%s MB" % size
-
     __get_hw_ram = staticmethod(__get_hw_ram)
 
     # @staticmethod
@@ -228,12 +218,11 @@ class Journal(object):
             return 'unknown'
         else:
             return "%.1f GB" % size
-
     __get_hw_hdd = staticmethod(__get_hw_hdd)
 
     # @staticmethod
     def createLog(severity, full_journal=False, jrnl=None):
-        # Backward compability
+        # Backward capability
         if jrnl is None:
             jrnl = Journal.openJournal()
 
@@ -304,7 +293,6 @@ class Journal(object):
         Journal.printHeadLog(testName)
         Journal.printLog("Phases: %d good, %d bad" % ((phasesProcessed - phasesFailed), phasesFailed))
         Journal.printLog("RESULT: %s" % testName, (phasesFailed == 0 and "PASS" or "FAIL"))
-
     createLog = staticmethod(createLog)
 
     # @staticmethod
@@ -319,7 +307,6 @@ class Journal(object):
 
         buildtime = time.gmtime(int(testInfo.next().format("%{BUILDTIME}")))
         return time.strftime(timeFormat, buildtime)
-
     getTestRpmBuilt = staticmethod(getTestRpmBuilt)
 
     # @staticmethod
@@ -331,7 +318,6 @@ class Journal(object):
             except IndexError:
                 envPackage = None
         return envPackage
-
     determinePackage = staticmethod(determinePackage)
 
     # @staticmethod
@@ -352,7 +338,6 @@ class Journal(object):
             rpms.append((pkgDetailsEl, pkgDetailsCon))
 
         return rpms
-
     getRpmVersion = staticmethod(getRpmVersion)
 
     # @staticmethod
@@ -379,7 +364,6 @@ class Journal(object):
                 pkgdetails.extend(rpmVersions)
 
         return pkgdetails
-
     collectPackageDetails = staticmethod(collectPackageDetails)
 
     # @staticmethod
@@ -495,7 +479,7 @@ class Journal(object):
 
         shre = re.compile(".+\.sh$")
         bpath = os.environ["BEAKERLIB"]
-        plugpath = os.path.join(bpath, "plugins")
+        plugpath = os.path.join(bpath, "plugin")
         plugins = []
 
         if os.path.exists(plugpath):
@@ -557,7 +541,6 @@ class Journal(object):
             # TODO Error handling
             Journal.printLog('Failed to save journal to %s: %s' % (jrnl, str(e)), 'BEAKERLIB_WARNING')
             return 1
-
     saveJournal = staticmethod(saveJournal)
 
     # @staticmethod
@@ -579,7 +562,6 @@ class Journal(object):
             Journal.initializeJournal(envTest, package)
             jrnl = Journal._openJournal()
         return jrnl
-
     openJournal = staticmethod(openJournal)
 
     # @staticmethod
@@ -591,7 +573,6 @@ class Journal(object):
         else:
             Journal.printLog("Failed to find \'log\' element")
             sys.exit(1)
-
     getLogEl = staticmethod(getLogEl)
 
     # @staticmethod
@@ -601,7 +582,6 @@ class Journal(object):
             if node.get('result') == 'unfinished':
                 candidate = node
         return candidate
-
     getLastUnfinishedPhase = staticmethod(getLastUnfinishedPhase)
 
     # @staticmethod
@@ -630,7 +610,6 @@ class Journal(object):
             phase.append(installed_pkg[0])
 
         log.append(phase)
-
         return Journal.saveJournal(jrnl)
 
     addPhase = staticmethod(addPhase)
@@ -646,7 +625,6 @@ class Journal(object):
                 else:
                     passed += 1
         return (passed, failed)
-
     getPhaseState = staticmethod(getPhaseState)
 
     # @staticmethod
@@ -671,7 +649,6 @@ class Journal(object):
         phase.set('score', str(failed))
         Journal.saveJournal(jrnl)
         return (phase.get('result'), phase.get('score'), type, name)
-
     finPhase = staticmethod(finPhase)
 
     """
@@ -682,7 +659,6 @@ class Journal(object):
             if node.getAttribute("name") == name:
                 return node
         return tree
-
     getPhase = staticmethod(getPhase)
     """
 
@@ -699,7 +675,6 @@ class Journal(object):
         if failed > 255:
             failed = 255
         return failed
-
     testState = staticmethod(testState)
 
     # @staticmethod
@@ -713,7 +688,6 @@ class Journal(object):
         if failed > 255:
             failed = 255
         return failed
-
     phaseState = staticmethod(phaseState)
 
     # @staticmethod
@@ -735,7 +709,6 @@ class Journal(object):
 
         add_to.append(msg)
         return 0
-
     addMessage = staticmethod(addMessage)
 
     # @staticmethod
@@ -762,7 +735,6 @@ class Journal(object):
         add_to.append(msg)
 
         return 0
-
     addTest = staticmethod(addTest)
 
     # @staticmethod
@@ -780,7 +752,6 @@ class Journal(object):
             pkgEl.text = pkgCon
             add_to.append(pkgEl)
         return 0
-
     logRpmVersion = staticmethod(logRpmVersion)
 
     # @staticmethod
@@ -805,7 +776,6 @@ class Journal(object):
         add_to.append(metric)
 
         return 0
-
     addMetric = staticmethod(addMetric)
 
     # @staticmethod
@@ -820,7 +790,6 @@ class Journal(object):
             print etree.tostring(jrnl, pretty_print=True, encoding="utf-8", xml_declaration=True)
         else:
             print "Journal dump error: bad type specification"
-
     dumpJournal = staticmethod(dumpJournal)
 
     def need(args):
@@ -862,7 +831,7 @@ def updateXML(optparser, jrnl=None):
 
     # Opening queue file for reading and writing
     try:
-        fh = open(queue_file, 'r+b')
+        fh = open(queue_file, 'r+')
     except IOError as e:
         Journal.printLog('Failed to open queue file with: ' + str(e) , 'BEAKERLIB_WARNING')
         return 1
@@ -1017,11 +986,11 @@ def main(_1='', _2='', _3='', _4='', _5='', _6='', _7='', _8='', _9='', _10=''):
             return ret_need
         Journal.printHeadLog(options.name)
     elif command == "printlog":
+        updateXML(optparser, jrnl)
         ret_need = need((options.severity, options.full_journal))
         if ret_need > 0:
             return ret_need
         Journal.createLog(options.severity, options.full_journal, jrnl=jrnl)
-        updateXML(optparser, jrnl)
         return 0
     elif command == "teststate":
         failed = Journal.testState(jrnl=jrnl)
