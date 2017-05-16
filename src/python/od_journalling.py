@@ -226,6 +226,8 @@ class Journal(object):
         if jrnl is None:
             jrnl = Journal.openJournal()
 
+        PACKAGE_FLAG = 0
+
         Journal.printHeadLog("TEST PROTOCOL")
         phasesFailed = 0
         phasesProcessed = 0
@@ -238,7 +240,10 @@ class Journal(object):
             elif node.tag == "testname":
                 Journal.printLog("Test name     : %s" % Journal.__childNodeValue(node, 0))
             elif node.tag == "pkgdetails":
-                Journal.printLog("Installed     : %s" % Journal.__childNodeValue(node, 0))
+                # Workaround for a bug causing multiple printing of used package
+                if PACKAGE_FLAG == 0:
+                    Journal.printLog("Installed     : %s" % Journal.__childNodeValue(node, 0))
+                    PACKAGE_FLAG = 1
             elif node.tag == "release":
                 Journal.printLog("Distro        : %s" % Journal.__childNodeValue(node, 0))
             elif node.tag == "starttime":
