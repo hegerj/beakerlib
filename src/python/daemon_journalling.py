@@ -898,11 +898,10 @@ def parseAndProcess(pipe_read, optparser):
         if ret_need > 0:
             ret_code = ret_need
         else:
-            if options.message == "":
-                Journal.createLog(options.severity, options.full_journal)
-                ret_code = 0
-            elif options.message == "toVar":
+            if options.message == "toVar":
                 message = Journal.createLog(options.severity, options.full_journal, toVar=True)
+            else:
+                Journal.createLog(options.severity, options.full_journal)
     elif command == "addphase":
         ret_need = need((options.name, options.type))
         if ret_need > 0:

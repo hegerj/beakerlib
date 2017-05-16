@@ -44,7 +44,6 @@ printing journal contents.
 
 =cut
 
-#__INTERNAL_JOURNALIST=beakerlib-journalling
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
 # Trap for signals, makes sure DAEMON is killed
@@ -337,6 +336,12 @@ Example:
 
 =cut
 
+# Argument --message is an optional
+# if used must have value "toVar" to have an affect, which is
+# that all printing done in journalling_daemon will not be printed
+# to stdout but instead it will be returned to journal.sh by function
+# rljCallDaemon. Its out put may then be caught by $() or redirecting to a file
+# Example of such usage in function rljClosePhase()
 rlJournalPrintText(){
     local SEVERITY=${LOG_LEVEL:-"INFO"}
     local FULL_JOURNAL=''
