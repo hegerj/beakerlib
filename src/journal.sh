@@ -46,7 +46,7 @@ printing journal contents.
 
 __INTERNAL_DAEMON_JOURNALIST=beakerlib-journalling-daemon
 
-# Trap for signals, makes sure Daemon is killed
+# trap for signals, makes sure Daemon is killed
 trap 'kill -9 "$BEAKERLIB_DAEMONPID" 2>/dev/null; exit' SIGHUP SIGINT SIGTERM
 
 
@@ -203,7 +203,6 @@ rlJournalEnd(){
         rlLog "JOURNAL TXT: $journaltext"
     fi
     # kill daemon
-    #PID=$(pgrep -f $__INTERNAL_DAEMON_JOURNALIST)
     kill $BEAKERLIB_DAEMONPID 2> /dev/null
 }
 
