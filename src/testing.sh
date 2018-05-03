@@ -663,7 +663,7 @@ rlAssertNotDiffer() {
 Run command with optional comment and make sure its exit code
 matches expectations.
 
-    rlRun [-t] [-l] [-c] [-s] command [status[,status...]] [comment]
+    rlRun [-t] [-l] [-c] [-s] command [status[,status...] [comment]]
 
 =over
 
@@ -749,6 +749,7 @@ rlRun() {
     local __INTERNAL_rlRun_TAG_OUT=''
     local __INTERNAL_rlRun_TAG_ERR=''
     local __INTERNAL_rlRun_LOG_FILE=''
+    local IFS
 
     while true ; do
         case "$1" in
@@ -801,7 +802,7 @@ rlRun() {
     # create __INTERNAL_rlRun_LOG_FILE if needed
     if $__INTERNAL_rlRun_DO_LOG || $__INTERNAL_rlRun_DO_KEEP
     then
-      __INTERNAL_rlRun_LOG_FILE=$( mktemp --tmpdir=$__INTERNAL_PERSISTENT_TMP rlRun_LOG.XXXXXXXX )
+      __INTERNAL_rlRun_LOG_FILE=$( mktemp -p $__INTERNAL_PERSISTENT_TMP rlRun_LOG.XXXXXXXX )
       if [ ! -e "$__INTERNAL_rlRun_LOG_FILE" ]
       then
         rlFail "rlRun: Internal file creation failed"
@@ -815,7 +816,7 @@ rlRun() {
     fi
 
     # in case expected exit code is provided as "2-5,26", expand it to "2,3,4,5,26"
-    while echo "$__INTERNAL_rlRun_expected" | grep -q '[0-9]-[0-9]'; do                                      
+    while echo "$__INTERNAL_rlRun_expected" | grep -q '[0-9]-[0-9]'; do
         local __INTERNAL_rlRun_interval=$(echo "$__INTERNAL_rlRun_expected" | sed "s/.*\(\<[0-9]\+-[0-9]\+\>\).*/\1/")
         if [ -z "$__INTERNAL_rlRun_interval" ]; then
             rlLogWarning "rlRun: Something happened when getting interval, using '0-0'"
@@ -844,7 +845,7 @@ rlRun() {
 
     rlLogDebug "rlRun: Running command: $__INTERNAL_rlRun_command"
 
-    rlLog "$__INTERNAL_rlRun_comment_begin" "" "" "BEGIN"
+    __INTERNAL_PrintText "$__INTERNAL_rlRun_comment_begin" "BEGIN"
 
     if $__INTERNAL_rlRun_DO_LOG || $__INTERNAL_rlRun_DO_TAG || $__INTERNAL_rlRun_DO_KEEP; then
         eval "$__INTERNAL_rlRun_command" 2> >(sed -u -e "s/^/$__INTERNAL_rlRun_TAG_ERR/g" |

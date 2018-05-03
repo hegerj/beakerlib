@@ -173,6 +173,15 @@ __INTERNAL_rlLibrarySearch() {
     return
   fi
 
+  __INTERNAL_rlLibrarySearchInRoot "$COMPONENT" "$LIBRARY" "/usr/share/beakerlib-libraries"
+  if [ -n "$LIBFILE" ]
+  then
+    local VERSION="$(__INTERNAL_extractLibraryVersion "$LIBFILE" "$COMPONENT/$LIBRARY")"
+      VERSION=${VERSION:+", version '$VERSION'"}
+    rlLogInfo "rlImport: Found '$COMPONENT/$LIBRARY'$VERSION in /usr/share/beakerlib-libraries"
+    return
+  fi
+
   if [ -n "$__INTERNAL_TraverseRoot" ]
   then
     rlLogDebug "rlImport: Trying to find the library in directories above test"
@@ -259,9 +268,10 @@ __INTERNAL_envdebugget() {
 __INTERNAL_envdebugdiff() {
   rlLogDebug "rlImport: library $1 changes following environment; changed functions are marked with asterisk (*)"
   diff -U0 <(echo "$__INTERNAL_envdebugvariables") <(__INTERNAL_envdebugget 1) | tail -n +3 | grep -E -v '^@@'
-  local line fn print='' print2 LF="
-"
-  while IFS= read line; do
+  local line fn print='' print2 LF=$'\n'
+  local IFS
+
+  while read -r line; do
     [[ "$line" =~ ^(.)([^[:space:]]+)[[:space:]]\(\) ]] && {
       [[ -n "$print" ]] && {
         echo "$fn"
